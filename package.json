@@ -1,0 +1,54 @@
+{
+  "name": "ro-brew-calc",
+  "type": "module",
+  "version": "1.2.0",
+  "description": "Ragnarok Online potion crafting cost-benefit calculator for Alchemist/Creator and Geneticist (ROLATAM server)",
+  "keywords": [
+    "ragnarok-online",
+    "ro",
+    "calculator",
+    "alchemist",
+    "geneticist",
+    "potion",
+    "crafting",
+    "astro"
+  ],
+  "homepage": "https://tebancl.github.io/ro-brew-calc/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tebancl/ro-brew-calc.git"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@astrojs/react": "^5.0.3",
+    "astro": "^6.1.4",
+    "katex": "^0.16.45",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/katex": "^0.16.8",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^3.0.0"
+  }
+}
