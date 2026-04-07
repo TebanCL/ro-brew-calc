@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tebancl.github.io/ro-brew-calc/sitemap.xml

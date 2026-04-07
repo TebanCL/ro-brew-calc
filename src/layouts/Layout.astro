@@ -3,20 +3,72 @@ import "../styles/globals.css";
 
 interface Props {
   title: string;
+  description?: string;
 }
-const { title } = Astro.props;
+
+const {
+  title,
+  description = "Free Ragnarok Online potion crafting calculator for Alchemist / Creator (Pharmacy, Potion Creation) and Geneticist (Special Pharmacy, Mix Cooking). Calculates success rates, costs, and profits. Tailored for the ROLATAM server.",
+} = Astro.props;
+
+const canonicalURL = new URL(import.meta.env.BASE_URL, Astro.site).href;
+const ogImage = new URL(`${import.meta.env.BASE_URL}assets/logo.png`, Astro.site).href;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "RO Potion Cost-Benefit Calculator",
+  "description": description,
+  "url": canonicalURL,
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "inLanguage": ["en", "es", "pt"],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+  },
+};
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Calculadora de costo-beneficio para creación de pociones en Ragnarok Online" />
+
+    <!-- Primary meta -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="RO Brew Calc" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_CL" />
+    <meta property="og:locale:alternate" content="pt_BR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
     <link rel="icon" type="image/png" sizes="32x32" href={`${import.meta.env.BASE_URL}favicon.png`} />
+
+    <!-- KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
-    <title>{title}</title>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
   </head>
   <body>
     <slot />
