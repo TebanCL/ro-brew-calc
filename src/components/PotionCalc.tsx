@@ -157,8 +157,20 @@ export default function PotionCalc() {
         </div>
       </div>
 
-      <footer className="ro-raised bg-secondary text-muted-foreground text-center mt-1.5 py-1 px-2.5 text-[11px]">
-        {u.footer}
+      <footer className="ro-raised bg-secondary text-muted-foreground text-center mt-1.5 py-1.5 px-2.5 text-[11px]">
+        <div>{u.footer}</div>
+        <a
+          href="https://ko-fi.com/tebancl"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 mt-1.5 px-3 py-1 rounded-sm text-white text-[11px] font-bold transition-brightness hover:brightness-110"
+          style={{ background: "#FF5E5B" }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+            <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 5.656-.082 8.37c0 5.928 6.269 5.655 6.269 5.655h4.241c2.303 0 3.168-1.487 3.168-1.487v1.26h2.53V14.95s.005 3.042 3.497 3.042h1.091c3.474 0 3.432-3.04 3.432-3.04l.15-4.074c.003-.095.002-.192-.002-.288l.543-.001s.003.04.003.04v4.323c0 .01 0 .02-.001.03 0 3.043-3.432 3.043-3.432 3.043h-1.091c-3.492 0-3.497-3.042-3.497-3.042v1.487H9.441s-6.269.273-6.269-5.655c0-2.714.082-8.37.082-8.37H19.02s4.086.508 4.859 4.593zm-5.082 4.002c0 1.654-1.344 2.995-3 2.995s-3-1.341-3-2.995V8.945h3c1.656 0 3 1.344 3 2.999v1.006z"/>
+          </svg>
+          Support on Ko-fi
+        </a>
       </footer>
     </div>
   );
