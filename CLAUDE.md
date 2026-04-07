@@ -53,7 +53,7 @@ ro-brew-calc/
 │   │   ├── i18n.ts                 # Lang type, ITEM_NAMES, UiStrings, UI record
 │   │   ├── data.ts                 # Recipes, NPC prices, ITEM_ICONS, itemIconUrl()
 │   │   ├── storage.ts              # lsGet / lsSet helpers
-│   │   ├── theme.ts                # RO color object + raised/sunken/thS/tdS (being migrated to CSS)
+│   │   ├── theme.ts                # RO color reference (no longer imported by components — values live in globals.css CSS variables)
 │   │   └── utils.ts                # cn() helper (clsx + tailwind-merge)
 │   ├── styles/
 │   │   └── globals.css             # Tailwind v4 entry, RO CSS variables, ro-raised/ro-sunken utilities

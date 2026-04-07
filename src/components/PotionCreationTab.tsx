@@ -4,7 +4,10 @@ import { getBrewRate } from "../lib/formulas";
 import type { UiStrings } from "../lib/i18n";
 import type { PCRecipe, SPRecipe } from "../lib/data";
 import { PC_RECIPES, itemIconUrl } from "../lib/data";
-import { RO, sunken, raised, thS, tdS } from "../lib/theme";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RoTitleBar } from "./RoTitleBar";
+import { cn } from "@/lib/utils";
 import { Ni } from "./Ni";
 import { Tex } from "./Tex";
 
@@ -39,62 +42,74 @@ export const PotionCreationTab = ({
   DEX,
   LUK,
 }: PotionCreationTabProps) => (
-  <div style={{ overflowX: "auto" }}>
-    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+  <div>
+    <div className="flex items-center gap-1.5 mb-1">
       <img src={`${import.meta.env.BASE_URL}assets/icons/skills/pharmacy.png`} alt="" width={24} height={24} style={{ imageRendering: "pixelated" }} />
-      <span style={{ fontWeight: 700, fontSize: 13, color: RO.text }}>{u.pcTitle}</span>
+      <span className="font-bold text-[13px] text-foreground">{u.pcTitle}</span>
     </div>
-    <p style={{ fontSize: 11, color: RO.textMuted, margin: "0 0 6px" }}>{u.pcSubtitle}</p>
-    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
-      <thead><tr>
-        <th style={thS}>{u.colPotion}</th><th style={thS}>{u.colCost}</th><th style={thS}>{u.colRate}</th><th style={thS}>{u.colSell}</th><th style={thS}>{u.colProfit}</th><th style={thS}></th>
-      </tr></thead>
-      <tbody>
+    <p className="text-[11px] text-muted-foreground mb-1.5">{u.pcSubtitle}</p>
+
+    <Table className="ro-table text-[12px]">
+      <TableHeader>
+        <TableRow className="border-0 hover:bg-transparent">
+          {[u.colPotion, u.colCost, u.colRate, u.colSell, u.colProfit, ""].map((h, i) => (
+            <TableHead key={i} className="bg-primary text-primary-foreground text-[11px] font-bold px-1.5 py-1 whitespace-nowrap border-r border-r-[var(--ro-shadow)] last:border-r-0 h-auto">
+              {h}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
         {PC_RECIPES.map((r, ri) => {
           const rate = getBrewRate(stats, r.potionRate);
           const cost = r.ingredients.reduce((s, i) => s + i.q * getPrice(i.n), 0);
           const sell = sellPrices[r.name] || 0;
-          const cps = rate > 0 ? Math.round(cost / (rate / 100)) : Infinity;
+          const cps  = rate > 0 ? Math.round(cost / (rate / 100)) : Infinity;
           const prof = sell - cps;
           return (
-            <tr key={ri} style={{ background: ri % 2 ? RO.row2 : RO.row1, borderBottom: `1px solid ${RO.rowBorder}` }}>
-              <td style={{ ...tdS, fontWeight: 700, color: RO.text, whiteSpace: "nowrap" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <TableRow key={ri} className={cn("border-0", ri % 2 === 0 ? "bg-muted" : "bg-accent")}>
+              <TableCell className="px-1.5 py-1 font-bold text-foreground whitespace-nowrap">
+                <div className="flex items-center gap-1">
                   {itemIconUrl(r.name, import.meta.env.BASE_URL) && (
                     <img src={itemIconUrl(r.name, import.meta.env.BASE_URL)!} alt="" width={24} height={24} style={{ imageRendering: "pixelated", flexShrink: 0 }} />
                   )}
                   {tItem(r.name)}
                 </div>
-              </td>
-              <td style={{ ...tdS, textAlign: "right", color: RO.cost }}>{fmt(cost)}z</td>
-              <td style={{ ...tdS, textAlign: "center", color: rate >= 80 ? RO.rateGood : rate >= 50 ? RO.rateMed : RO.rateBad }}>{rate.toFixed(1)}%</td>
-              <td style={tdS}><Ni val={sell} onChange={v => setSellPrices(p => ({ ...p, [r.name]: v }))} w="70px" /></td>
-              <td style={{ ...tdS, textAlign: "right", fontWeight: 700, color: prof >= 0 && sell > 0 ? RO.profit : RO.loss }}>{rate > 0 && sell > 0 ? fmtZ(prof) : "-"}</td>
-              <td style={tdS}><button onClick={() => setDetail(r)} style={{ ...raised, background: RO.panelAlt, color: RO.textMid, cursor: "pointer", padding: "2px 8px", fontSize: 11 }}>{u.detail}</button></td>
-            </tr>
+              </TableCell>
+              <TableCell className="px-1.5 py-1 text-right text-ro-cost">{fmt(cost)}z</TableCell>
+              <TableCell className={cn("px-1.5 py-1 text-center font-bold", rate >= 80 ? "text-ro-rate-good" : rate >= 50 ? "text-ro-rate-med" : "text-ro-rate-bad")}>
+                {rate.toFixed(1)}%
+              </TableCell>
+              <TableCell className="px-1.5 py-1">
+                <Ni val={sell} onChange={v => setSellPrices(p => ({ ...p, [r.name]: v }))} w="70px" />
+              </TableCell>
+              <TableCell className={cn("px-1.5 py-1 text-right font-bold", prof >= 0 && sell > 0 ? "text-ro-profit" : "text-ro-loss")}>
+                {rate > 0 && sell > 0 ? fmtZ(prof) : "-"}
+              </TableCell>
+              <TableCell className="px-1.5 py-1">
+                <Button variant="ro" size="ro" onClick={() => setDetail(r)}>{u.detail}</Button>
+              </TableCell>
+            </TableRow>
           );
         })}
-      </tbody>
-    </table>
+      </TableBody>
+    </Table>
 
     {/* PC FORMULA */}
-    <div style={{ ...sunken, background: "#e4eef8", marginTop: 10 }}>
-      <div style={{ background: RO.titleBg, color: "#fff", fontSize: 11, fontWeight: 700, padding: "2px 8px", display: "flex", justifyContent: "space-between" }}>
-        <span>{u.formulaTitle} — Pharmacy</span>
-        <span style={{ fontWeight: 400, opacity: 0.8 }}>{u.formulaSource}</span>
-      </div>
-      <div style={{ padding: "8px 12px", color: RO.text, overflowX: "auto" }}>
-        <div style={{ textAlign: "center" }}>
+    <div className="ro-sunken bg-[#e4eef8] mt-2.5">
+      <RoTitleBar right={u.formulaSource}>{u.formulaTitle} — Pharmacy</RoTitleBar>
+      <div className="px-3 py-2 text-foreground overflow-x-auto">
+        <div className="text-center">
           <Tex display tex={`\\begin{aligned} \\text{Rate} ={} &(\\text{PrepPot}\\times 3) + \\text{PotRes} + \\text{InstChange} + (\\text{JobLv}\\times 0.2) \\\\ &+ (\\text{DEX}\\times 0.1) + (\\text{LUK}\\times 0.1) + (\\text{INT}\\times 0.05) + \\text{PotionRate} \\end{aligned}`} />
         </div>
-        <div style={{ color: RO.titleBg, margin: "6px 0 2px", fontSize: 12, fontWeight: 700, borderTop: `1px solid ${RO.rowBorder}`, paddingTop: 6 }}>{u.formulaWithStats}</div>
-        <div style={{ textAlign: "center" }}>
+        <div className="text-primary text-[12px] font-bold border-t border-border pt-1.5 mt-1.5">{u.formulaWithStats}</div>
+        <div className="text-center">
           <Tex display tex={`${stats.PreparePotion_Lv * 3} + ${stats.PotionResearch_Lv} + ${stats.InstructionChange_Lv} + ${(stats.JobLv * 0.2).toFixed(1)} + ${(DEX * 0.1).toFixed(1)} + ${(LUK * 0.1).toFixed(1)} + ${(INT * 0.05).toFixed(2)} = \\mathbf{${pcBaseRate.toFixed(2)}}`} />
         </div>
-        <div style={{ textAlign: "center" }}>
+        <div className="text-center">
           <Tex display tex={`\\text{Rate} = \\mathbf{${pcBaseRate.toFixed(2)}} + \\text{PotionRate}`} />
         </div>
-        <div style={{ color: RO.textMuted, fontSize: 10, textAlign: "center", marginTop: 2 }}>({u.formulaClamp})</div>
+        <div className="text-muted-foreground text-[10px] text-center mt-0.5">({u.formulaClamp})</div>
       </div>
     </div>
   </div>

@@ -18,8 +18,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `ro-table` utility for alternating row colors without inline index checks
 - `ro`, `ro-tab-active`, `ro-tab-inactive` button variants in `buttonVariants`
 - `@/` path alias configured in `tsconfig.json` (`src/` root)
+- `src/components/ui/table.tsx` and `src/components/ui/dialog.tsx` (shadcn primitives)
+- shadcn `Dialog` in `DetailModal` adds focus trap, Escape-to-close, and `aria-modal` accessibility
 
 ### Changed
+- All components migrated from inline `theme.ts` styles to Tailwind utility classes + shadcn primitives:
+  - `Ni.tsx` → shadcn `Input`
+  - `PricesTab.tsx` → Tailwind grid + shadcn `Button`
+  - `PotionCreationTab.tsx`, `SpecialPharmacyTab.tsx`, `MixCookingTab.tsx` → shadcn `Table` + `Button` + `RoTitleBar`
+  - `StatsPanel.tsx` → Tailwind layout + `RoTitleBar`
+  - `DetailModal.tsx` → shadcn `Dialog`
+  - `PotionCalc.tsx` → Tailwind shell, tab `Button` variants, native `<select>` with Tailwind classes
+  - `MiniBar.tsx` → Tailwind classes + CSS custom properties (component kept custom)
+- `theme.ts` no longer imported by any component; `raised`/`sunken`/`thS`/`tdS` replaced by `ro-raised`/`ro-sunken` utilities and `TableHead`/`TableCell` classNames
 - Global CSS (resets, scrollbar, body grid) moved from `Layout.astro` `<style>` to `src/styles/globals.css`
 - `Layout.astro` now imports `globals.css` via Astro frontmatter instead of a `<style is:global>` block
 - `astro.config.mjs` — removed `// @ts-check` (Vite plugin type conflict between `@tailwindcss/vite` and Astro's bundled Vite); added `vite.plugins: [tailwindcss()]`

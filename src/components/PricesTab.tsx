@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { UiStrings } from "../lib/i18n";
 import { ALL_ITEMS, NPC_PRICES_BASE, itemIconUrl } from "../lib/data";
-import { RO, raised } from "../lib/theme";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Ni } from "./Ni";
 
 interface PricesTabProps {
@@ -13,24 +14,34 @@ interface PricesTabProps {
 }
 
 export const PricesTab = ({ prices, setPrices, u, tItem, discRate }: PricesTabProps) => (
-  <div style={{ maxWidth: 620, margin: "0 auto" }}>
-    <h3 style={{ color: RO.text, fontSize: 13, marginBottom: 2, fontWeight: 700 }}>{u.materialPrices}</h3>
-    <p style={{ fontSize: 11, color: RO.textMuted, margin: "0 0 6px" }}>{u.priceSubtitle(discRate)}</p>
-    <div className="prices-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+  <div className="max-w-[620px] mx-auto">
+    <h3 className="text-foreground text-[13px] mb-0.5 font-bold">{u.materialPrices}</h3>
+    <p className="text-[11px] text-muted-foreground mb-1.5">{u.priceSubtitle(discRate)}</p>
+    <div className="prices-grid grid grid-cols-2 gap-px">
       {ALL_ITEMS.map((name, idx) => {
         const npc = NPC_PRICES_BASE[name];
         const disc = npc ? Math.floor(npc * (100 - discRate) / 100) : null;
         const cur = prices[name];
         const display = cur !== undefined && cur !== 0 ? cur : (disc || 0);
         return (
-          <div key={name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: idx % 2 === 0 ? RO.row1 : RO.row2, padding: "3px 6px", borderBottom: `1px solid ${RO.rowBorder}`, gap: 4 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 4, flex: 1, minWidth: 0, overflow: "hidden" }} title={tItem(name)}>
+          <div
+            key={name}
+            className={cn(
+              "flex justify-between items-center px-1.5 py-0.5 border-b border-border gap-1",
+              idx % 2 === 0 ? "bg-muted" : "bg-accent"
+            )}
+          >
+            <div className="flex items-center gap-1 flex-1 min-w-0 overflow-hidden" title={tItem(name)}>
               {itemIconUrl(name, import.meta.env.BASE_URL) && (
-                <img src={itemIconUrl(name, import.meta.env.BASE_URL)!} alt="" width={18} height={18} style={{ imageRendering: "pixelated", flexShrink: 0 }} />
+                <img
+                  src={itemIconUrl(name, import.meta.env.BASE_URL)!}
+                  alt="" width={18} height={18}
+                  style={{ imageRendering: "pixelated", flexShrink: 0 }}
+                />
               )}
-              <span style={{ fontSize: 11, color: RO.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <span className="text-[11px] text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
                 {tItem(name)}
-                {npc ? <span style={{ color: RO.textMuted, fontSize: 10 }}> ({npc}→{disc})</span> : null}
+                {npc ? <span className="text-muted-foreground text-[10px]"> ({npc}→{disc})</span> : null}
               </span>
             </div>
             <Ni val={display} onChange={v => setPrices(p => ({ ...p, [name]: v }))} w="70px" min={0} />
@@ -38,8 +49,8 @@ export const PricesTab = ({ prices, setPrices, u, tItem, discRate }: PricesTabPr
         );
       })}
     </div>
-    <button onClick={() => setPrices({})} style={{ marginTop: 8, padding: "4px 14px", ...raised, background: RO.panelAlt, color: RO.textMid, cursor: "pointer", fontSize: 11 }}>
+    <Button variant="ro" size="ro" className="mt-2" onClick={() => setPrices({})}>
       {u.resetPrices}
-    </button>
+    </Button>
   </div>
 );
