@@ -5,7 +5,6 @@ import { type Lang, LANG_LOCALES, ITEM_NAMES, UI } from "../lib/i18n";
 import { DISCOUNT_RATES, NPC_PRICES_BASE, defaultStats } from "../lib/data";
 import type { PCRecipe, SPRecipe, MCRecipe } from "../lib/data";
 import { Button } from "@/components/ui/button";
-import { RoTitleBar } from "./RoTitleBar";
 import { StatsPanel } from "./StatsPanel";
 import { PricesTab } from "./PricesTab";
 import { DetailModal } from "./DetailModal";
