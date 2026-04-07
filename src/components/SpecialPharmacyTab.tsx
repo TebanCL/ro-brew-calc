@@ -1,3 +1,4 @@
+import { useState, Fragment } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { Stats } from "../lib/formulas";
 import { getSPQty } from "../lib/formulas";
@@ -39,6 +40,12 @@ export const SpecialPharmacyTab = ({
   specificVal, maxPot, sklv, INT, DEX, LUK,
 }: SpecialPharmacyTabProps) => {
   const spBase = INT + Math.floor(DEX / 2) + LUK + stats.JobLv + (stats.BaseLv - 100) + (stats.PotionResearch_Lv * 5);
+  const [openRows, setOpenRows] = useState<Set<string>>(new Set());
+  const toggle = (name: string) => setOpenRows(prev => {
+    const s = new Set(prev);
+    if (s.has(name)) s.delete(name); else s.add(name);
+    return s;
+  });
 
   return (
     <div>
@@ -65,33 +72,58 @@ export const SpecialPharmacyTab = ({
             const cpu = qty > 0 ? Math.round(cost / qty) : 0;
             const sell = sellPrices[r.name] || 0;
             const profLot = sell * qty - cost;
+            const isOpen = openRows.has(r.name);
+            const rowBg = ri % 2 === 0 ? "bg-muted" : "bg-accent";
             return (
-              <TableRow key={ri} className={cn("border-0", ri % 2 === 0 ? "bg-muted" : "bg-accent")}>
-                <TableCell className="px-1.5 py-1 font-bold text-foreground whitespace-nowrap">
-                  <div className="flex items-center gap-1">
-                    {itemIconUrl(r.name, import.meta.env.BASE_URL) && (
-                      <img src={itemIconUrl(r.name, import.meta.env.BASE_URL)!} alt="" width={24} height={24} style={{ imageRendering: "pixelated", flexShrink: 0 }} />
-                    )}
-                    {tItem(r.name)}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground font-normal">Rate:{r.itemRate}</div>
-                </TableCell>
-                <TableCell className="px-1.5 py-1 text-right text-ro-cost">{fmt(cost)}z</TableCell>
-                <TableCell className={cn("px-1.5 py-1 text-center font-bold", qty >= maxPot ? "text-ro-rate-good" : qty >= maxPot - 3 ? "text-ro-rate-med" : "text-ro-rate-bad")}>
-                  {qty}
-                </TableCell>
-                <TableCell className="px-1.5 py-1 text-right text-secondary-foreground">{fmt(cpu)}z</TableCell>
-                <TableCell className="px-1.5 py-1">
-                  <Ni val={sell} onChange={v => setSellPrices(p => ({ ...p, [r.name]: v }))} w="70px" />
-                </TableCell>
-                <TableCell className={cn("px-1.5 py-1 text-right font-bold", profLot >= 0 && sell > 0 ? "text-ro-profit" : "text-ro-loss")}>
-                  {sell > 0 ? fmtZ(profLot) : "-"}
-                  <div className="text-[10px] font-normal text-muted-foreground">/u: {sell > 0 ? fmtZ(sell - cpu) : "-"}</div>
-                </TableCell>
-                <TableCell className="px-1.5 py-1">
-                  <Button variant="ro" size="ro" onClick={() => setDetail(r)}>{u.detail}</Button>
-                </TableCell>
-              </TableRow>
+              <Fragment key={ri}>
+                <TableRow className={cn("border-0", rowBg)}>
+                  <TableCell
+                    className="px-1.5 py-1 font-bold text-foreground whitespace-nowrap cursor-pointer select-none"
+                    onClick={() => toggle(r.name)}
+                  >
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] text-muted-foreground w-2.5 inline-block">{isOpen ? "▾" : "▸"}</span>
+                      {itemIconUrl(r.name, import.meta.env.BASE_URL) && (
+                        <img src={itemIconUrl(r.name, import.meta.env.BASE_URL)!} alt="" width={24} height={24} style={{ imageRendering: "pixelated", flexShrink: 0 }} />
+                      )}
+                      {tItem(r.name)}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground font-normal pl-3.5">Rate:{r.itemRate}</div>
+                  </TableCell>
+                  <TableCell className="px-1.5 py-1 text-right text-ro-cost">{fmt(cost)}z</TableCell>
+                  <TableCell className={cn("px-1.5 py-1 text-center font-bold", qty >= maxPot ? "text-ro-rate-good" : qty >= maxPot - 3 ? "text-ro-rate-med" : "text-ro-rate-bad")}>
+                    {qty}
+                  </TableCell>
+                  <TableCell className="px-1.5 py-1 text-right text-secondary-foreground">{fmt(cpu)}z</TableCell>
+                  <TableCell className="px-1.5 py-1">
+                    <Ni val={sell} onChange={v => setSellPrices(p => ({ ...p, [r.name]: v }))} w="70px" />
+                  </TableCell>
+                  <TableCell className={cn("px-1.5 py-1 text-right font-bold", profLot >= 0 && sell > 0 ? "text-ro-profit" : "text-ro-loss")}>
+                    {sell > 0 ? fmtZ(profLot) : "-"}
+                    <div className="text-[10px] font-normal text-muted-foreground">/u: {sell > 0 ? fmtZ(sell - cpu) : "-"}</div>
+                  </TableCell>
+                  <TableCell className="px-1.5 py-1">
+                    <Button variant="ro" size="ro" onClick={() => setDetail(r)}>{u.detail}</Button>
+                  </TableCell>
+                </TableRow>
+                {isOpen && (
+                  <TableRow className={cn("border-0", rowBg)}>
+                    <TableCell colSpan={7} className="px-2 pb-2 pt-0">
+                      <div className="ro-sunken bg-input px-2 py-1.5 flex flex-wrap gap-x-4 gap-y-0.5">
+                        {r.ingredients.map((ing, ii) => (
+                          <div key={ii} className="flex items-center gap-1 text-[11px] text-secondary-foreground">
+                            {itemIconUrl(ing.n, import.meta.env.BASE_URL) && (
+                              <img src={itemIconUrl(ing.n, import.meta.env.BASE_URL)!} alt="" width={16} height={16} style={{ imageRendering: "pixelated", flexShrink: 0 }} />
+                            )}
+                            <span>{ing.q}× {tItem(ing.n)}</span>
+                            <span className="text-ro-cost">{fmt(ing.q * getPrice(ing.n))}z</span>
+                          </div>
+                        ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </Fragment>
             );
           })}
         </TableBody>
