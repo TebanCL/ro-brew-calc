@@ -1,4 +1,6 @@
 ---
+import "../styles/globals.css";
+
 interface Props {
   title: string;
 }
@@ -20,54 +22,3 @@ const { title } = Astro.props;
     <slot />
   </body>
 </html>
-
-<style is:global>
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-
-  body {
-    font-family: Tahoma, Verdana, Geneva, sans-serif;
-    background-color: #0c1828;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,30,60,0.15) 3px, rgba(0,30,60,0.15) 4px),
-      repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,30,60,0.15) 3px, rgba(0,30,60,0.15) 4px);
-    color: #080c18;
-    min-height: 100vh;
-  }
-
-  input[type=number]::-webkit-inner-spin-button,
-  input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  input[type=number] {
-    -moz-appearance: textfield;
-  }
-
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #7898b8;
-    border-top: 2px solid #dff0ff;
-    border-left: 2px solid #dff0ff;
-    border-bottom: 2px solid #304870;
-    border-right: 2px solid #304870;
-  }
-  ::-webkit-scrollbar-track {
-    background: #1a2840;
-    border-top: 2px solid #304870;
-    border-left: 2px solid #304870;
-    border-bottom: 2px solid #dff0ff;
-    border-right: 2px solid #dff0ff;
-  }
-
-  @media (max-width: 480px) {
-    .header-subtitle { display: none; }
-    .prices-grid { grid-template-columns: 1fr !important; }
-  }
-</style>

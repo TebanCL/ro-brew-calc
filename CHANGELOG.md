@@ -9,6 +9,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Tailwind CSS v4** via `@tailwindcss/vite` Vite plugin (no config file — pure CSS)
+- **shadcn/ui** scaffolded: `components.json`, `src/styles/globals.css`, `src/lib/utils.ts`
+- `src/components/ui/button.tsx` and `src/components/ui/input.tsx` (shadcn primitives)
+- `src/components/RoTitleBar.tsx` — shared blue title bar component used across all panels
+- RO Basic Skin CSS variable system: all palette colors mapped to shadcn token slots (`--primary`, `--card`, `--muted`, etc.) plus RO-specific variables (`--ro-hilight`, `--ro-shadow`, `--ro-profit`, etc.)
+- `ro-raised` and `ro-sunken` Tailwind custom utilities for the 3-D bevel border effect
+- `ro-table` utility for alternating row colors without inline index checks
+- `ro`, `ro-tab-active`, `ro-tab-inactive` button variants in `buttonVariants`
+- `@/` path alias configured in `tsconfig.json` (`src/` root)
+
+### Changed
+- Global CSS (resets, scrollbar, body grid) moved from `Layout.astro` `<style>` to `src/styles/globals.css`
+- `Layout.astro` now imports `globals.css` via Astro frontmatter instead of a `<style is:global>` block
+- `astro.config.mjs` — removed `// @ts-check` (Vite plugin type conflict between `@tailwindcss/vite` and Astro's bundled Vite); added `vite.plugins: [tailwindcss()]`
+
+
 - **Mix Cooking tab** (Geneticist skill — `GN_MIX_COOKING`)
   - 6 recipes: Savage BBQ, Warg Blood Cocktail, Minor Brisket, Siroma Icetea, Drosera Herb Stew, Petite Tail Noodles
   - Formula: Creation = ⌊JobLv/4⌋ + ⌊DEX/3⌋ + ⌊LUK/2⌋; Difficulty = Rand(30–150) + ItemRate (15 for all)

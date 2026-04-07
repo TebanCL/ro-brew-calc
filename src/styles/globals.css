@@ -1,0 +1,169 @@
+@import "tailwindcss";
+
+/* ── RO Basic Skin — CSS variable definitions ─────────────────────────────
+   shadcn token slots (used by shadcn primitives via hsl(var(--token)))
+   Values expressed as HSL channels: H S% L%
+   ───────────────────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    /* shadcn semantic tokens */
+    --background:          213 57% 10%;   /* #0c1828  — page dark navy */
+    --foreground:          228 50%  6%;   /* #080c18  — text */
+
+    --card:                210 34% 79%;   /* #b8c8dc  — panelBg */
+    --card-foreground:     228 50%  6%;   /* #080c18 */
+
+    --popover:             210 34% 79%;   /* #b8c8dc */
+    --popover-foreground:  228 50%  6%;   /* #080c18 */
+
+    --primary:             215 48% 49%;   /* #4070b8  — title bar blue */
+    --primary-foreground:    0  0% 100%;  /* #ffffff */
+
+    --secondary:           213 22% 68%;   /* #9aaabf  — panelAlt */
+    --secondary-foreground: 228 33% 19%;  /* #202840  — textMid */
+
+    --muted:               210 49% 85%;   /* #c8d8ec  — row1 */
+    --muted-foreground:    214 33% 47%;   /* #5070a0  — textMuted */
+
+    --accent:              210 27% 74%;   /* #aabace  — row2 */
+    --accent-foreground:   228 33% 19%;   /* #202840 */
+
+    --destructive:         352 100% 24%;  /* #780010  — loss/cost */
+    --destructive-foreground: 0 0% 100%;  /* #ffffff */
+
+    --border:              210 30% 60%;   /* #7898b8  — rowBorder */
+    --input:               210 77% 95%;   /* #eaf2fc  — inputBg */
+    --ring:                215 48% 49%;   /* #4070b8 */
+
+    --radius: 0rem; /* RO style has no border radius */
+
+    /* RO-specific variables (no shadcn slot) */
+    --ro-hilight:    #dff0ff;
+    --ro-shadow:     #304870;
+    --ro-profit:     #005010;
+    --ro-loss:       #780010;
+    --ro-rate-good:  #007020;
+    --ro-rate-med:   #806000;
+    --ro-rate-bad:   #801020;
+    --ro-cost:       #780010;
+    --ro-ing-color:  #304870;
+    --ro-bar-pess:   #902020;
+    --ro-bar-avg:    #887010;
+    --ro-bar-opt:    #087020;
+    --ro-bar-track:  #182030;
+  }
+}
+
+/* ── Tailwind v4 theme extension ──────────────────────────────────────────
+   Expose shadcn tokens and RO colors as Tailwind utilities
+   (bg-primary, text-ro-profit, etc.)
+   ───────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  --color-background:         hsl(var(--background));
+  --color-foreground:         hsl(var(--foreground));
+  --color-card:               hsl(var(--card));
+  --color-card-foreground:    hsl(var(--card-foreground));
+  --color-popover:            hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary:            hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary:          hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted:              hsl(var(--muted));
+  --color-muted-foreground:   hsl(var(--muted-foreground));
+  --color-accent:             hsl(var(--accent));
+  --color-accent-foreground:  hsl(var(--accent-foreground));
+  --color-destructive:        hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border:             hsl(var(--border));
+  --color-input:              hsl(var(--input));
+  --color-ring:               hsl(var(--ring));
+
+  /* RO functional colors as utilities */
+  --color-ro-profit:    var(--ro-profit);
+  --color-ro-loss:      var(--ro-loss);
+  --color-ro-rate-good: var(--ro-rate-good);
+  --color-ro-rate-med:  var(--ro-rate-med);
+  --color-ro-rate-bad:  var(--ro-rate-bad);
+  --color-ro-cost:      var(--ro-cost);
+  --color-ro-ing:       var(--ro-ing-color);
+  --color-ro-hilight:   var(--ro-hilight);
+  --color-ro-shadow:    var(--ro-shadow);
+
+  /* Font */
+  --font-ro: Tahoma, Verdana, Geneva, sans-serif;
+}
+
+/* ── RO 3-D bevel utilities ───────────────────────────────────────────────
+   Cannot be expressed as standard Tailwind border utilities because each
+   side uses a different color. Defined as custom utilities.
+   ───────────────────────────────────────────────────────────────────────── */
+@utility ro-raised {
+  border-top:    2px solid var(--ro-hilight);
+  border-left:   2px solid var(--ro-hilight);
+  border-bottom: 2px solid var(--ro-shadow);
+  border-right:  2px solid var(--ro-shadow);
+}
+
+@utility ro-sunken {
+  border-top:    2px solid var(--ro-shadow);
+  border-left:   2px solid var(--ro-shadow);
+  border-bottom: 2px solid var(--ro-hilight);
+  border-right:  2px solid var(--ro-hilight);
+}
+
+/* ── RO table — alternating row colors ────────────────────────────────────*/
+@utility ro-table {
+  & tbody tr:nth-child(odd)  { background-color: hsl(var(--muted)); }
+  & tbody tr:nth-child(even) { background-color: hsl(var(--accent)); }
+  & tbody tr { border-bottom: 1px solid hsl(var(--border)); }
+}
+
+/* ── Global resets (kept from Layout.astro) ───────────────────────────────*/
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: Tahoma, Verdana, Geneva, sans-serif;
+    background-color: #0c1828;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,30,60,0.15) 3px, rgba(0,30,60,0.15) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,30,60,0.15) 3px, rgba(0,30,60,0.15) 4px);
+    color: #080c18;
+    min-height: 100vh;
+  }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb {
+    background: #7898b8;
+    border-top:    2px solid #dff0ff;
+    border-left:   2px solid #dff0ff;
+    border-bottom: 2px solid #304870;
+    border-right:  2px solid #304870;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1a2840;
+    border-top:    2px solid #304870;
+    border-left:   2px solid #304870;
+    border-bottom: 2px solid #dff0ff;
+    border-right:  2px solid #dff0ff;
+  }
+
+  @media (max-width: 480px) {
+    .header-subtitle { display: none; }
+    .prices-grid { grid-template-columns: 1fr !important; }
+  }
+}

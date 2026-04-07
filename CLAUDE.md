@@ -9,7 +9,9 @@ RO Potion Cost-Benefit Calculator — a single-page Astro + React app that helps
 - **Astro 6** with `@astrojs/react` integration
 - **React 19** (client-side components with `client:load`)
 - **TypeScript** (strict mode)
-- No CSS framework — inline styles using the RO Basic Skin theme (cool blue-gray palette, 3-D bevel borders)
+- **Tailwind CSS v4** via `@tailwindcss/vite` (no config file — configured in `src/styles/globals.css` via `@theme`)
+- **shadcn/ui** components in `src/components/ui/` — primitives styled to match the RO Basic Skin theme
+- RO Basic Skin theme: cool blue-gray palette mapped to CSS variables; 3-D bevel borders via `.ro-raised` / `.ro-sunken` Tailwind utilities
 - **KaTeX** for math formula rendering in the browser (CSS loaded from CDN in `Layout.astro`)
 - **localStorage** for persistence (stats, prices, sell prices, language preference)
 - **i18n**: English (default), Spanish, Portuguese — via `ITEM_NAMES` map + `UI` strings object in `src/lib/i18n.ts`
@@ -33,6 +35,8 @@ ro-brew-calc/
 │       └── skills/                 # 6 skill icons from browiki.org
 ├── src/
 │   ├── components/
+│   │   ├── ui/                     # shadcn/ui primitives (button, input, …)
+│   │   ├── RoTitleBar.tsx          # Shared blue title bar (bg-primary, bevel bottom)
 │   │   ├── PotionCalc.tsx          # Root coordinator: state, derived values, layout shell
 │   │   ├── StatsPanel.tsx          # Stats/skills/levels inputs + derived values bar
 │   │   ├── PricesTab.tsx           # Material prices tab
@@ -49,12 +53,16 @@ ro-brew-calc/
 │   │   ├── i18n.ts                 # Lang type, ITEM_NAMES, UiStrings, UI record
 │   │   ├── data.ts                 # Recipes, NPC prices, ITEM_ICONS, itemIconUrl()
 │   │   ├── storage.ts              # lsGet / lsSet helpers
-│   │   └── theme.ts                # RO color object, raised/sunken/thS/tdS styles
+│   │   ├── theme.ts                # RO color object + raised/sunken/thS/tdS (being migrated to CSS)
+│   │   └── utils.ts                # cn() helper (clsx + tailwind-merge)
+│   ├── styles/
+│   │   └── globals.css             # Tailwind v4 entry, RO CSS variables, ro-raised/ro-sunken utilities
 │   ├── layouts/
-│   │   └── Layout.astro            # HTML shell, global CSS, KaTeX CDN link
+│   │   └── Layout.astro            # HTML shell, imports globals.css, KaTeX CDN link
 │   └── pages/
 │       └── index.astro             # Imports Layout + PotionCalc with client:load
-├── astro.config.mjs                # site/base config for GitHub Pages
+├── components.json                 # shadcn/ui configuration
+├── astro.config.mjs                # site/base config, @tailwindcss/vite plugin
 ├── eslint.config.js                # ESLint flat config
 ├── package.json                    # packageManager: pnpm, engines: node>=22
 ├── tsconfig.json

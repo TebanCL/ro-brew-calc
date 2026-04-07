@@ -4,6 +4,10 @@
       "jsx": "react-jsx",
       "jsxImportSource": "react",
       "lib": ["es2015", "dom"],
-      "types": ["astro/client"]
+      "types": ["astro/client"],
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./src/*"]
+      }
     }
   }
