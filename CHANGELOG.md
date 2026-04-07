@@ -8,41 +8,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+---
+
+## [1.3.0] - 2026-04-07
+
 ### Added
-- **Collapsible ingredient list** in all recipe tabs (Potion Creation, Special Pharmacy, Mix Cooking)
-  - Click on any recipe row's name cell to toggle a dropdown showing all ingredients
-  - Each ingredient shows its icon (16×16), quantity × translated name, and cost in zeny
-  - Expanded row inherits the alternating row background color
-  - ▸/▾ chevron indicator on each row reflects open/closed state
-
-### Added (previous)
-- **Tailwind CSS v4** via `@tailwindcss/vite` Vite plugin (no config file — pure CSS)
-- **shadcn/ui** scaffolded: `components.json`, `src/styles/globals.css`, `src/lib/utils.ts`
-- `src/components/ui/button.tsx` and `src/components/ui/input.tsx` (shadcn primitives)
-- `src/components/RoTitleBar.tsx` — shared blue title bar component used across all panels
-- RO Basic Skin CSS variable system: all palette colors mapped to shadcn token slots (`--primary`, `--card`, `--muted`, etc.) plus RO-specific variables (`--ro-hilight`, `--ro-shadow`, `--ro-profit`, etc.)
-- `ro-raised` and `ro-sunken` Tailwind custom utilities for the 3-D bevel border effect
-- `ro-table` utility for alternating row colors without inline index checks
-- `ro`, `ro-tab-active`, `ro-tab-inactive` button variants in `buttonVariants`
-- `@/` path alias configured in `tsconfig.json` (`src/` root)
-- `src/components/ui/table.tsx` and `src/components/ui/dialog.tsx` (shadcn primitives)
-- shadcn `Dialog` in `DetailModal` adds focus trap, Escape-to-close, and `aria-modal` accessibility
-
-### Changed
-- All components migrated from inline `theme.ts` styles to Tailwind utility classes + shadcn primitives:
-  - `Ni.tsx` → shadcn `Input`
-  - `PricesTab.tsx` → Tailwind grid + shadcn `Button`
-  - `PotionCreationTab.tsx`, `SpecialPharmacyTab.tsx`, `MixCookingTab.tsx` → shadcn `Table` + `Button` + `RoTitleBar`
-  - `StatsPanel.tsx` → Tailwind layout + `RoTitleBar`
-  - `DetailModal.tsx` → shadcn `Dialog`
-  - `PotionCalc.tsx` → Tailwind shell, tab `Button` variants, native `<select>` with Tailwind classes
-  - `MiniBar.tsx` → Tailwind classes + CSS custom properties (component kept custom)
-- `theme.ts` no longer imported by any component; `raised`/`sunken`/`thS`/`tdS` replaced by `ro-raised`/`ro-sunken` utilities and `TableHead`/`TableCell` classNames
-- Global CSS (resets, scrollbar, body grid) moved from `Layout.astro` `<style>` to `src/styles/globals.css`
-- `Layout.astro` now imports `globals.css` via Astro frontmatter instead of a `<style is:global>` block
-- `astro.config.mjs` — removed `// @ts-check` (Vite plugin type conflict between `@tailwindcss/vite` and Astro's bundled Vite); added `vite.plugins: [tailwindcss()]`
-
-
 - **Mix Cooking tab** (Geneticist skill — `GN_MIX_COOKING`)
   - 6 recipes: Savage BBQ, Warg Blood Cocktail, Minor Brisket, Siroma Icetea, Drosera Herb Stew, Petite Tail Noodles
   - Formula: Creation = ⌊JobLv/4⌋ + ⌊DEX/3⌋ + ⌊LUK/2⌋; Difficulty = Rand(30–150) + ItemRate (15 for all)
@@ -50,28 +20,34 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Pessimistic / expected / optimistic scenarios (Rand = 150 / 90 / 30)
   - KaTeX formula section with live stat substitution and Δ preview per scenario
   - Detail modal with ingredient icons and per-scenario bar charts
-  - 21 new item icons: 6 recipe outputs + 15 ingredients (Divine Pride)
-  - Mix Cooking skill icon from browiki.org
-  - Mix Cooking skill input added to Skills panel (max level 2)
-  - MC Creation (avg) shown in the Stats summary bar
-  - All 15 new ingredients added to the Prices tab with icons and localStorage persistence
-  - Translations for all new items and UI strings (EN / ES / PT)
+  - 21 new item icons, Mix Cooking skill icon, skill input in Skills panel (max level 2)
+  - All 15 new ingredients added to the Prices tab; EN / ES / PT translations
+- **Collapsible ingredient list** in all recipe tabs — click the ▸/▾ chevron on any row to expand ingredients with icons, quantities, and costs
+- **shadcn/ui** component library integrated: `Button`, `Input`, `Table`, `Dialog` primitives
+- **Tailwind CSS v4** via `@tailwindcss/vite` (no config file — pure CSS with `@theme`)
+- `RoTitleBar` shared component; `ro-raised`, `ro-sunken`, `ro-table` custom Tailwind utilities
+- RO Basic Skin CSS variable system mapped to shadcn token slots
+- `getMCCreation()` and `getMCQty()` pure formula functions
 - `kind` discriminant field on recipe interfaces (`"pc"` / `"sp"` / `"mc"`) for type-safe modal branching
-- `getMCCreation()` and `getMCQty()` pure formula functions in `src/lib/formulas.ts`
-
-### Fixed
-- Base URL missing trailing slash in `astro.config.mjs` caused all asset icons to 404 in production (`/ro-brew-calcassets/` → `/ro-brew-calc/assets/`)
-- Favicon link used absolute `/favicon.svg` instead of `BASE_URL`-relative path, causing 404 on GitHub Pages
+- Pixel-art "Calculadora Poción" favicon: `favicon.ico` (16/32/48 px) + `favicon.png` (32 px) + `logo.png` (128 px)
+- GitHub icon link in header (opens repo in new tab)
+- Ko-fi support button in footer (`ko-fi.com/tebancl`)
+- SEO: Open Graph tags, Twitter Card, canonical URL, JSON-LD `WebApplication` structured data
+- `public/robots.txt` and `public/sitemap.xml`
 
 ### Changed
-- Mobile layout improvements:
-  - Stats section (INT/DEX/LUK) now wraps on narrow screens instead of overflowing
-  - Title bar wraps gracefully on mobile; subtitle hidden below 480 px via media query
-  - Prices tab switches to single-column grid on screens ≤ 480 px
-- Favicon replaced with pixel-art "Calculadora Poción" icon (potion bottle with calculator): `favicon.ico` (16/32/48px) + `favicon.png` (32px)
-- App title bar now shows the pixel-art logo (28×28) replacing the ⚗ emoji
-- Added `public/assets/logo.png` (128×128) used in the header
-- CI `tsc --noEmit` failing due to missing `astro/client` types and `typescript` not being an explicit devDependency
+- All components migrated from inline `theme.ts` styles to Tailwind utility classes + shadcn primitives (`Ni`, `PricesTab`, `PotionCreationTab`, `SpecialPharmacyTab`, `MixCookingTab`, `StatsPanel`, `DetailModal`, `PotionCalc`, `MiniBar`)
+- `DetailModal` now uses shadcn `Dialog` (adds focus trap, Escape-to-close, `aria-modal`)
+- `theme.ts` no longer imported by any component
+- Mobile layout improvements: stats section wraps on narrow screens, title bar wraps gracefully, subtitle hidden below 480 px, Prices tab switches to single-column grid on ≤ 480 px
+- `html[lang]` corrected from `"es"` to `"en"` (app defaults to English)
+- Page title updated to `"RO Potion Cost-Benefit Calculator — Ragnarok Latinoamérica"`
+- CI: opt into Node.js 24 for GitHub Actions runners (`FORCE_JAVASCRIPT_ACTIONS_TO_NODE24`)
+
+### Fixed
+- Base URL missing trailing slash caused all asset icons to 404 in production
+- Favicon used absolute path without `BASE_URL`, causing 404 on GitHub Pages
+- Unused `RoTitleBar` import in `PotionCalc.tsx` (lint error)
 
 ---
 
