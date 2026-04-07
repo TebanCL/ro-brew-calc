@@ -11,7 +11,8 @@ const { title } = Astro.props;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Calculadora de costo-beneficio para creación de pociones en Ragnarok Online" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href={`${import.meta.env.BASE_URL}favicon.ico`} />
+    <link rel="icon" type="image/png" sizes="32x32" href={`${import.meta.env.BASE_URL}favicon.png`} />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous" />
     <title>{title}</title>
   </head>
@@ -63,5 +64,10 @@ const { title } = Astro.props;
     border-left: 2px solid #304870;
     border-bottom: 2px solid #dff0ff;
     border-right: 2px solid #dff0ff;
+  }
+
+  @media (max-width: 480px) {
+    .header-subtitle { display: none; }
+    .prices-grid { grid-template-columns: 1fr !important; }
   }
 </style>

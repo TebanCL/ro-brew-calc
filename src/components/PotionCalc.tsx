@@ -66,10 +66,13 @@ export default function PotionCalc() {
       <div style={{ ...raised, background: RO.panelBg }}>
 
         {/* Title Bar */}
-        <div style={{ background: RO.titleBg, padding: "5px 10px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `2px solid ${RO.shadow}` }}>
-          <h1 style={{ color: RO.titleText, margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: 0.5 }}>⚗ RO Potion Cost-Benefit Calculator</h1>
+        <div style={{ background: RO.titleBg, padding: "5px 10px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `2px solid ${RO.shadow}`, flexWrap: "wrap", rowGap: 4 }}>
+          <h1 style={{ color: RO.titleText, margin: 0, fontSize: 13, fontWeight: 700, letterSpacing: 0.5, display: "flex", alignItems: "center", gap: 6 }}>
+            <img src={`${import.meta.env.BASE_URL}assets/logo.png`} alt="" width={28} height={28} style={{ imageRendering: "pixelated" }} />
+            RO Potion Cost-Benefit Calculator
+          </h1>
           <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <span style={{ fontSize: 11, color: "#a0c0e0" }}>{u.subtitle}</span>
+            <span className="header-subtitle" style={{ fontSize: 11, color: "#a0c0e0" }}>{u.subtitle}</span>
             <select
               value={lang}
               onChange={e => setLang(e.target.value as Lang)}

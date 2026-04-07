@@ -16,7 +16,7 @@ export const PricesTab = ({ prices, setPrices, u, tItem, discRate }: PricesTabPr
   <div style={{ maxWidth: 620, margin: "0 auto" }}>
     <h3 style={{ color: RO.text, fontSize: 13, marginBottom: 2, fontWeight: 700 }}>{u.materialPrices}</h3>
     <p style={{ fontSize: 11, color: RO.textMuted, margin: "0 0 6px" }}>{u.priceSubtitle(discRate)}</p>
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
+    <div className="prices-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
       {ALL_ITEMS.map((name, idx) => {
         const npc = NPC_PRICES_BASE[name];
         const disc = npc ? Math.floor(npc * (100 - discRate) / 100) : null;

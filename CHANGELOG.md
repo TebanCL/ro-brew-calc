@@ -8,6 +8,37 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **Mix Cooking tab** (Geneticist skill — `GN_MIX_COOKING`)
+  - 6 recipes: Savage BBQ, Warg Blood Cocktail, Minor Brisket, Siroma Icetea, Drosera Herb Stew, Petite Tail Noodles
+  - Formula: Creation = ⌊JobLv/4⌋ + ⌊DEX/3⌋ + ⌊LUK/2⌋; Difficulty = Rand(30–150) + ItemRate (15 for all)
+  - Output quantity table: 10–12 (Δ≥30), 10 (Δ≥10), 8 (Δ>-30), 5 (Δ>-50), Failure (Δ≤-50)
+  - Pessimistic / expected / optimistic scenarios (Rand = 150 / 90 / 30)
+  - KaTeX formula section with live stat substitution and Δ preview per scenario
+  - Detail modal with ingredient icons and per-scenario bar charts
+  - 21 new item icons: 6 recipe outputs + 15 ingredients (Divine Pride)
+  - Mix Cooking skill icon from browiki.org
+  - Mix Cooking skill input added to Skills panel (max level 2)
+  - MC Creation (avg) shown in the Stats summary bar
+  - All 15 new ingredients added to the Prices tab with icons and localStorage persistence
+  - Translations for all new items and UI strings (EN / ES / PT)
+- `kind` discriminant field on recipe interfaces (`"pc"` / `"sp"` / `"mc"`) for type-safe modal branching
+- `getMCCreation()` and `getMCQty()` pure formula functions in `src/lib/formulas.ts`
+
+### Fixed
+- Base URL missing trailing slash in `astro.config.mjs` caused all asset icons to 404 in production (`/ro-brew-calcassets/` → `/ro-brew-calc/assets/`)
+- Favicon link used absolute `/favicon.svg` instead of `BASE_URL`-relative path, causing 404 on GitHub Pages
+
+### Changed
+- Mobile layout improvements:
+  - Stats section (INT/DEX/LUK) now wraps on narrow screens instead of overflowing
+  - Title bar wraps gracefully on mobile; subtitle hidden below 480 px via media query
+  - Prices tab switches to single-column grid on screens ≤ 480 px
+- Favicon replaced with pixel-art "Calculadora Poción" icon (potion bottle with calculator): `favicon.ico` (16/32/48px) + `favicon.png` (32px)
+- App title bar now shows the pixel-art logo (28×28) replacing the ⚗ emoji
+- Added `public/assets/logo.png` (128×128) used in the header
+- CI `tsc --noEmit` failing due to missing `astro/client` types and `typescript` not being an explicit devDependency
+
 ---
 
 ## [1.2.0] - 2026-04-06

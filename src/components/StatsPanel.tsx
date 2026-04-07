@@ -51,7 +51,7 @@ export const StatsPanel = ({ stats, setStat, u, pcBaseRate, spCreationAvg, speci
       </div>
       <div>
         <div style={{ background: RO.titleBg, color: "#ffffff", fontWeight: 700, fontSize: 11, textAlign: "center", padding: "2px 8px", marginBottom: 4 }}>{u.stats}</div>
-        <div style={{ display: "flex", gap: 6, justifyContent: "center" }}>
+        <div style={{ display: "flex", gap: 6, justifyContent: "center", flexWrap: "wrap" }}>
           {([["INT", "bINT", "eINT"], ["DEX", "bDEX", "eDEX"], ["LUK", "bLUK", "eLUK"]] as const).map(([l, bk, ek]) => (
             <div key={l} style={{ textAlign: "center", ...raised, background: RO.panelBg, padding: "2px 6px" }}>
               <div style={{ fontSize: 11, color: RO.textMid, fontWeight: 700 }}>{l}</div>
