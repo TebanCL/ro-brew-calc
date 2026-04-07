@@ -3,7 +3,7 @@ export interface Stats {
   eINT: number; eDEX: number; eLUK: number;
   BaseLv: number; JobLv: number;
   PreparePotion_Lv: number; PotionResearch_Lv: number; InstructionChange_Lv: number;
-  FCP_Lv: number; SpecialPharmacy_Lv: number; Pharmacy_Lv: number; Discount_Lv: number;
+  FCP_Lv: number; SpecialPharmacy_Lv: number; MixCooking_Lv: number; Pharmacy_Lv: number; Discount_Lv: number;
 }
 
 export function getBrewRate(s: Stats, potionRate: number): number {
@@ -31,4 +31,24 @@ export function getSPQty(creation: number, specificVal: number, itemRate: number
   if (d >= 100) return Math.max(1, maxPot - 4);
   if (d >= 1) return Math.max(1, maxPot - 5);
   return Math.max(1, maxPot - 6);
+}
+
+/** Creation value for Mix Cooking: floor(JobLv/4) + floor(DEX/3) + floor(LUK/2) */
+export function getMCCreation(s: Stats): number {
+  const DEX = s.bDEX + s.eDEX, LUK = s.bLUK + s.eLUK;
+  return Math.floor(s.JobLv / 4) + Math.floor(DEX / 3) + Math.floor(LUK / 2);
+}
+
+/**
+ * Output quantity for Mix Cooking given creation, the random component (30–150),
+ * itemRate, and bonusQty (0=pessimistic, 1=expected, 2=optimistic) for the 10–12 range.
+ * Difficulty = rnd + itemRate. Returns 0 on failure.
+ */
+export function getMCQty(creation: number, rnd: number, itemRate: number, bonusQty: number): number {
+  const delta = creation - (rnd + itemRate);
+  if (delta <= -50) return 0;
+  if (delta <= -30) return 5;
+  if (delta < 10) return 8;
+  if (delta < 30) return 10;
+  return 10 + bonusQty;
 }

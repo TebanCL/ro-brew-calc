@@ -5,7 +5,7 @@ const defaultStats: Stats = {
   bINT: 120, bDEX: 120, bLUK: 120, BaseLv: 200, JobLv: 70,
   eINT: 0, eDEX: 0, eLUK: 0,
   PreparePotion_Lv: 10, PotionResearch_Lv: 10, InstructionChange_Lv: 5,
-  FCP_Lv: 5, SpecialPharmacy_Lv: 10, Pharmacy_Lv: 10, Discount_Lv: 10,
+  FCP_Lv: 5, SpecialPharmacy_Lv: 10, MixCooking_Lv: 2, Pharmacy_Lv: 10, Discount_Lv: 10,
 };
 
 // ---- getBrewRate ----

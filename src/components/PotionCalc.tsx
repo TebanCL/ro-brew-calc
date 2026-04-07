@@ -1,15 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
-import { type Stats, getSPCreation, getSPMaxPot } from "../lib/formulas";
+import { type Stats, getSPCreation, getSPMaxPot, getMCCreation } from "../lib/formulas";
 import { lsGet, lsSet } from "../lib/storage";
 import { type Lang, LANG_LOCALES, ITEM_NAMES, UI } from "../lib/i18n";
 import { DISCOUNT_RATES, NPC_PRICES_BASE, defaultStats } from "../lib/data";
-import type { PCRecipe, SPRecipe } from "../lib/data";
+import type { PCRecipe, SPRecipe, MCRecipe } from "../lib/data";
 import { RO, sunken, raised } from "../lib/theme";
 import { StatsPanel } from "./StatsPanel";
 import { PricesTab } from "./PricesTab";
 import { DetailModal } from "./DetailModal";
 import { PotionCreationTab } from "./PotionCreationTab";
 import { SpecialPharmacyTab } from "./SpecialPharmacyTab";
+import { MixCookingTab } from "./MixCookingTab";
 
 export default function PotionCalc() {
   const [stats, setStats] = useState<Stats>(() => lsGet("ro_stats", defaultStats));
@@ -17,7 +18,7 @@ export default function PotionCalc() {
   const [sellPrices, setSellPrices] = useState<Record<string, number>>(() => lsGet("ro_sell", {}));
   const [lang, setLang] = useState<Lang>(() => lsGet("ro_lang", "en" as Lang));
   const [tab, setTab] = useState(1);
-  const [detail, setDetail] = useState<PCRecipe | SPRecipe | null>(null);
+  const [detail, setDetail] = useState<PCRecipe | SPRecipe | MCRecipe | null>(null);
 
   useEffect(() => { lsSet("ro_stats", stats); }, [stats]);
   useEffect(() => { lsSet("ro_prices", prices); }, [prices]);
@@ -49,6 +50,7 @@ export default function PotionCalc() {
   const spCreationAvg = getSPCreation(stats, 90, 7);
   const spCreationPess = getSPCreation(stats, 30, 4);
   const spCreationOpt = getSPCreation(stats, 150, 10);
+  const mcCreation = getMCCreation(stats);
   const pcBaseRate = (stats.PreparePotion_Lv * 3) + stats.PotionResearch_Lv + stats.InstructionChange_Lv +
     (stats.JobLv * 0.2) + (DEX * 0.1) + (LUK * 0.1) + (INT * 0.05);
 
@@ -92,6 +94,7 @@ export default function PotionCalc() {
             spCreationAvg={spCreationAvg}
             specificVal={specificVal}
             maxPot={maxPot}
+            mcCreationAvg={mcCreation}
             discRate={discRate}
           />
 
@@ -110,7 +113,7 @@ export default function PotionCalc() {
 
           <DetailModal
             detail={detail}
-            setDetail={setDetail}
+            setDetail={setDetail as (r: PCRecipe | SPRecipe | MCRecipe | null) => void}
             tItem={tItem}
             u={u}
             fmt={fmt}
@@ -152,6 +155,23 @@ export default function PotionCalc() {
               fmtZ={fmtZ}
               pcBaseRate={pcBaseRate}
               INT={INT}
+              DEX={DEX}
+              LUK={LUK}
+            />
+          )}
+
+          {/* MIX COOKING */}
+          {tab === 3 && (
+            <MixCookingTab
+              stats={stats}
+              getPrice={getPrice}
+              sellPrices={sellPrices}
+              setSellPrices={setSellPrices}
+              setDetail={setDetail as (r: PCRecipe | SPRecipe | MCRecipe | null) => void}
+              u={u}
+              tItem={tItem}
+              fmt={fmt}
+              fmtZ={fmtZ}
               DEX={DEX}
               LUK={LUK}
             />

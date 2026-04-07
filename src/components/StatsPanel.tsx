@@ -11,10 +11,11 @@ interface StatsPanelProps {
   spCreationAvg: number;
   specificVal: number;
   maxPot: number;
+  mcCreationAvg: number;
   discRate: number;
 }
 
-export const StatsPanel = ({ stats, setStat, u, pcBaseRate, spCreationAvg, specificVal, maxPot, discRate }: StatsPanelProps) => (
+export const StatsPanel = ({ stats, setStat, u, pcBaseRate, spCreationAvg, specificVal, maxPot, mcCreationAvg, discRate }: StatsPanelProps) => (
   <div style={{ ...sunken, background: RO.panelAlt, padding: "8px 10px", marginBottom: 8 }}>
     <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 14 }}>
       <div>
@@ -37,7 +38,8 @@ export const StatsPanel = ({ stats, setStat, u, pcBaseRate, spCreationAvg, speci
             ["Instruction Change", "InstructionChange_Lv", "instruction-change.png", 5],
             ["FCP",                "FCP_Lv",               "fcp.png",                5],
             ["Sp. Pharmacy",       "SpecialPharmacy_Lv",   "special-pharmacy.png",  10],
-            ["Discount",           "Discount_Lv",          "discount.png",          10],
+            ["Mix Cooking",        "MixCooking_Lv",        "mix-cooking.png",         2],
+            ["Discount",           "Discount_Lv",          "discount.png",           10],
           ] as const).map(([l, k, icon, max]) => (
             <div key={k} style={{ display: "flex", alignItems: "center", gap: 4, ...raised, background: RO.panelBg, padding: "2px 5px" }}>
               <img src={`${import.meta.env.BASE_URL}assets/icons/skills/${icon}`} alt="" width={18} height={18} style={{ imageRendering: "pixelated", flexShrink: 0 }} />
@@ -69,6 +71,7 @@ export const StatsPanel = ({ stats, setStat, u, pcBaseRate, spCreationAvg, speci
       <span>{u.spCreationAvg}: <b style={{ color: RO.textMid }}>{Math.round(spCreationAvg)}</b></span>
       <span>{u.spSpecificVal}: <b style={{ color: RO.textMid }}>{specificVal}</b></span>
       <span>{u.spMax}: <b style={{ color: RO.textMid }}>{maxPot}</b></span>
+      <span>{u.mcCreationAvg}: <b style={{ color: RO.textMid }}>{Math.round(mcCreationAvg)}</b></span>
       <span>{u.discount}: <b style={{ color: RO.textMid }}>{discRate}%</b></span>
     </div>
   </div>

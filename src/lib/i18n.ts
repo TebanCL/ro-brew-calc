@@ -91,11 +91,34 @@ export const ITEM_NAMES: Record<string, { es: string; pt: string }> = {
   "Red Herb Activator":         { es: "Activador de Hierba Roja",         pt: "Energético Físico" },
   "Blue Herb Activator":        { es: "Activador de Hierbas Azules",      pt: "Energético Mágico" },
   "Golden X Potion":            { es: "Poción X",                         pt: "Poção X" },
+  // MC recipe outputs
+  "Savage BBQ":                 { es: "BBQ Savage",                       pt: "Savage Grelhado" },
+  "Warg Blood Cocktail":        { es: "Cóctel de Sangre de Warg",         pt: "Drinque de Sangue de Warg" },
+  "Minor Brisket":              { es: "Pecho de ternera",                 pt: "Peito Braseado" },
+  "Siroma Icetea":              { es: "Té helado Siroma",                 pt: "Chá Gelado de Siroma" },
+  "Drosera Herb Stew":          { es: "Estofado de hierbas Drosera",      pt: "Ensopado de Ervas de Drosera" },
+  "Petite Tail Noodles":        { es: "Fideos con cola de Petite",        pt: "Macarrão com Cauda de Petite" },
+  // MC ingredients
+  "Melange Pot":                { es: "Olla mezcladora",                  pt: "Panela de Mistura" },
+  "Savage Meat":                { es: "Carne salvaje",                    pt: "Carne Selvagem" },
+  "Cooking Skewer":             { es: "Asador",                           pt: "Espeto de Cozinha" },
+  "Black Charcoal":             { es: "Carbón negro",                     pt: "Carvão Preto" },
+  "Blood Of Wolf":              { es: "Sangre de lobo",                   pt: "Sangue de Lobo" },
+  "Cold Ice":                   { es: "Hielo frío",                       pt: "Gelo Frio" },
+  "Beef Head":                  { es: "Cabeza de res",                    pt: "Cabeça de Carne" },
+  "Large Cookpot":              { es: "Olla grande",                      pt: "Panela Grande" },
+  "Ice Piece":                  { es: "Trozo de hielo",                   pt: "Fragmento de Gelo" },
+  "Ice Crystal":                { es: "Cristal de hielo",                 pt: "Cristal de Gelo" },
+  "Comodo Tropical Fruit":      { es: "Fruta tropical de Comodo",         pt: "Fruta Tropical de Comodo" },
+  "Drosera Tentacle":           { es: "Tentáculo de Drosera",             pt: "Tentáculo de Drosera" },
+  "Petite's Tail":              { es: "Cola de Petite",                   pt: "Cauda de Petite" },
+  "Fine Noodle":                { es: "Fideos finos",                     pt: "Macarrão Fino" },
+  "Cool Gravy":                 { es: "Salsa especial",                   pt: "Molho Especial" },
 };
 
 export interface UiStrings {
   subtitle: string;
-  tabs: [string, string, string];
+  tabs: [string, string, string, string];
   levels: string;
   skills: string;
   stats: string;
@@ -103,6 +126,7 @@ export interface UiStrings {
   spCreationAvg: string;
   spSpecificVal: string;
   spMax: string;
+  mcCreationAvg: string;
   discount: string;
   materialPrices: string;
   priceSubtitle: (rate: number) => string;
@@ -140,12 +164,16 @@ export interface UiStrings {
   formulaSource: string;
   formulaClamp: string;
   formulaQtyTable: string;
+  mcTitle: string;
+  mcSubtitle: string;
+  mcCreationLabel: string;
+  mcFailure: string;
 }
 
 export const UI: Record<Lang, UiStrings> = {
   en: {
     subtitle: "Server: Ragnarok Latinoamérica",
-    tabs: ["Prices", "Potion Creation", "Special Pharmacy"],
+    tabs: ["Prices", "Potion Creation", "Special Pharmacy", "Mix Cooking"],
     levels: "Levels",
     skills: "Skills",
     stats: "Stats (Base + Bonus)",
@@ -153,6 +181,7 @@ export const UI: Record<Lang, UiStrings> = {
     spCreationAvg: "SP Creation(avg)",
     spSpecificVal: "SP Specific Val",
     spMax: "SP Max",
+    mcCreationAvg: "MC Creation(avg)",
     discount: "Discount",
     materialPrices: "Material Prices",
     priceSubtitle: (r) => `NPC items with Discount ${r}%. Override if buying from market.`,
@@ -190,10 +219,14 @@ export const UI: Record<Lang, UiStrings> = {
     formulaSource: "Source: iRO Wiki / browiki.org",
     formulaClamp: "Clamped to [0%, 100%]",
     formulaQtyTable: "Quantity by Creation − Difficulty delta:",
+    mcTitle: "Mix Cooking (Geneticist)",
+    mcSubtitle: "1 craft = 1 set of ingredients → produces multiple dishes. All Item Rates: 15.",
+    mcCreationLabel: "Creation",
+    mcFailure: "Failure",
   },
   es: {
     subtitle: "Servidor: Ragnarok Latinoamérica",
-    tabs: ["Precios", "Potion Creation", "Special Pharmacy"],
+    tabs: ["Precios", "Potion Creation", "Special Pharmacy", "Mix Cooking"],
     levels: "Niveles",
     skills: "Habilidades",
     stats: "Stats (Base + Bono)",
@@ -201,6 +234,7 @@ export const UI: Record<Lang, UiStrings> = {
     spCreationAvg: "Creación SP(prom)",
     spSpecificVal: "Val. Específico SP",
     spMax: "SP Max",
+    mcCreationAvg: "Creación MC(prom)",
     discount: "Descuento",
     materialPrices: "Precios de Materiales",
     priceSubtitle: (r) => `Items NPC con Descuento ${r}%. Modifica si compras en mercado.`,
@@ -238,10 +272,14 @@ export const UI: Record<Lang, UiStrings> = {
     formulaSource: "Fuente: iRO Wiki / browiki.org",
     formulaClamp: "Limitado a [0%, 100%]",
     formulaQtyTable: "Cantidad según delta Creación − Dificultad:",
+    mcTitle: "Mix Cooking (Geneticist)",
+    mcSubtitle: "1 craft = 1 set de ingredientes → produce múltiples platos. Item Rate: 15 en todos.",
+    mcCreationLabel: "Creación",
+    mcFailure: "Fallo",
   },
   pt: {
     subtitle: "Servidor: Ragnarok Latinoamérica",
-    tabs: ["Preços", "Potion Creation", "Special Pharmacy"],
+    tabs: ["Preços", "Potion Creation", "Special Pharmacy", "Mix Cooking"],
     levels: "Níveis",
     skills: "Habilidades",
     stats: "Stats (Base + Bônus)",
@@ -249,6 +287,7 @@ export const UI: Record<Lang, UiStrings> = {
     spCreationAvg: "Criação SP(méd)",
     spSpecificVal: "Val. Específico SP",
     spMax: "SP Máx",
+    mcCreationAvg: "Criação MC(méd)",
     discount: "Desconto",
     materialPrices: "Preços dos Materiais",
     priceSubtitle: (r) => `Itens NPC com Desconto ${r}%. Altere se comprar no mercado.`,
@@ -286,5 +325,9 @@ export const UI: Record<Lang, UiStrings> = {
     formulaSource: "Fonte: iRO Wiki / browiki.org",
     formulaClamp: "Limitado a [0%, 100%]",
     formulaQtyTable: "Quantidade pelo delta Criação − Dificuldade:",
+    mcTitle: "Mix Cooking (Geneticist)",
+    mcSubtitle: "1 craft = 1 conjunto de ingredientes → produz vários pratos. Item Rate: 15 em todos.",
+    mcCreationLabel: "Criação",
+    mcFailure: "Falha",
   },
 };
