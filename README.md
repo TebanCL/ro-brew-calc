@@ -2,18 +2,24 @@
 
 [![CI](https://github.com/tebancl/ro-brew-calc/actions/workflows/deploy.yml/badge.svg)](https://github.com/tebancl/ro-brew-calc/actions/workflows/deploy.yml)
 
-A single-page calculator for Ragnarok Online players to evaluate the profitability of potion crafting via **Potion Creation** (Alchemist / Creator) and **Special Pharmacy** (Geneticist).
+A single-page calculator for Ragnarok Online players to evaluate the profitability of potion crafting via **Potion Creation** (Alchemist / Creator), **Special Pharmacy**, and **Mix Cooking** (Geneticist).
 
 Targets the **Ragnarok Latinoamérica** server. Available in English, Spanish, and Portuguese.
+
+🔗 **[Live app](https://tebancl.github.io/ro-brew-calc/)**
 
 ## Features
 
 - **Potion Creation** — 18 recipes with success rate, cost-per-success, and profit per unit
 - **Special Pharmacy** — 19 recipes with quantity produced, per-unit cost, and batch profit
+- **Mix Cooking** — 6 recipes with pessimistic / expected / optimistic quantity scenarios
+- **Collapsible ingredient list** per recipe row — click any potion name to expand
+- **Detail modal** with pessimistic / expected / optimistic bar charts per recipe
 - **Material Prices** — NPC base prices with Discount skill support and manual override
-- **Pessimistic / Expected / Optimistic** scenarios for Special Pharmacy outputs
+- **KaTeX formula sections** with live stat substitution in all three craft tabs
 - All settings persisted in `localStorage` — no account needed
 - Language selector: EN / ES / PT (official ROLATAM item names)
+- Item and skill icons sourced from Divine Pride and browiki.org
 
 ## Development
 
@@ -39,15 +45,41 @@ pnpm test
 ```
 src/
 ├── components/
-│   └── PotionCalc.tsx    # main UI component
+│   ├── PotionCalc.tsx          # root coordinator (state, layout)
+│   ├── StatsPanel.tsx          # stats / skills / levels inputs
+│   ├── PricesTab.tsx           # material prices tab
+│   ├── PotionCreationTab.tsx   # PC table + KaTeX formula
+│   ├── SpecialPharmacyTab.tsx  # SP table + KaTeX formula
+│   ├── MixCookingTab.tsx       # MC table + KaTeX formula
+│   ├── DetailModal.tsx         # per-recipe detail modal
+│   ├── Ni.tsx                  # reusable number input
+│   ├── MiniBar.tsx             # horizontal bar chart (3 scenarios)
+│   ├── Tex.tsx                 # KaTeX wrapper
+│   ├── RoTitleBar.tsx          # shared blue title bar
+│   └── ui/                     # shadcn/ui primitives
 ├── lib/
-│   ├── formulas.ts       # pure formula functions (exported)
-│   └── formulas.test.ts  # Vitest unit tests
+│   ├── formulas.ts             # pure formula functions (exported)
+│   ├── formulas.test.ts        # Vitest unit tests
+│   ├── data.ts                 # recipes, NPC prices, item icons
+│   ├── i18n.ts                 # EN / ES / PT strings
+│   ├── storage.ts              # localStorage helpers
+│   └── utils.ts                # cn() helper
+├── styles/
+│   └── globals.css             # Tailwind v4 entry + RO theme CSS variables
 ├── layouts/
-│   └── Layout.astro
+│   └── Layout.astro            # HTML shell, SEO meta tags
 └── pages/
     └── index.astro
 ```
+
+## Tech stack
+
+- **Astro 6** + **React 19** (`client:load`)
+- **Tailwind CSS v4** via `@tailwindcss/vite` (configured in CSS, no config file)
+- **shadcn/ui** components styled to match the RO Basic Skin theme
+- **KaTeX** for math formula rendering
+- **Vitest** for unit tests
+- Deployed via **GitHub Pages** + GitHub Actions
 
 ## Data sources
 
@@ -55,6 +87,10 @@ src/
 - Item Rates (Special Pharmacy): [browiki.org — Farmacologia Avançada](https://browiki.org/wiki/Farmacologia_Avan%C3%A7ada)
 - Item names: [RagnaPlace ROLATAM database](https://ragnaplace.com)
 - Item icons: [Divine Pride](https://www.divine-pride.net)
+
+## Support
+
+If this tool saves you zeny, consider [supporting on Ko-fi](https://ko-fi.com/tebancl) ☕
 
 ## Contributing
 
