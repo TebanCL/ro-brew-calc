@@ -38,6 +38,7 @@ ro-brew-calc/
 │   │   ├── PricesTab.tsx           # Material prices tab
 │   │   ├── PotionCreationTab.tsx   # PC table + KaTeX formula section
 │   │   ├── SpecialPharmacyTab.tsx  # SP table + KaTeX formula section
+│   │   ├── MixCookingTab.tsx       # MC table + KaTeX formula section
 │   │   ├── DetailModal.tsx         # Pessimistic/expected/optimistic detail modal
 │   │   ├── Ni.tsx                  # Reusable number input (supports min/max clamping)
 │   │   ├── MiniBar.tsx             # Horizontal bar chart for 3-scenario display
@@ -77,8 +78,9 @@ pnpm typecheck       # tsc --noEmit
 ### Core Data (in `src/lib/data.ts`; formulas in `src/lib/formulas.ts`)
 
 - `NPC_PRICES_BASE` — Base NPC prices before Discount skill. Key reference for item costs.
-- `PC_RECIPES` (Potion Creation) — 18 recipes. Each has `name`, `ingredients[]`, and `potionRate` (modifier to brew success %).
-- `SP_RECIPES` (Special Pharmacy) — 19 recipes. Each has `name`, `ingredients[]`, and `itemRate` (difficulty modifier).
+- `PC_RECIPES` (Potion Creation) — 18 recipes. Each has `kind: "pc"`, `name`, `ingredients[]`, and `potionRate` (modifier to brew success %).
+- `SP_RECIPES` (Special Pharmacy) — 19 recipes. Each has `kind: "sp"`, `name`, `ingredients[]`, and `itemRate` (difficulty modifier).
+- `MC_RECIPES` (Mix Cooking) — 6 recipes. Each has `kind: "mc"`, `name`, `ingredients[]`, and `itemRate` (all 15). The `kind` discriminant is used for type-safe branching in the detail modal.
 - `DISCOUNT_RATES` — Array mapping Discount skill level (0-10) to % discount.
 
 ### Formulas (from iRO Wiki)
@@ -89,6 +91,22 @@ rate = (PreparePotion_Lv × 3) + PotionResearch_Lv + InstructionChange_Lv
      + (JobLv × 0.2) + (DEX × 0.1) + (LUK × 0.1) + (INT × 0.05)
      + potionRate
 ```
+
+**Mix Cooking — Creation vs Difficulty comparison:**
+```
+Creation = floor(JobLv/4) + floor(DEX/3) + floor(LUK/2)   ← deterministic, no random
+
+Difficulty = Random(30, 150) + ItemRate
+```
+
+Output quantity by delta (Creation − Difficulty):
+- ≥ 30  → 10–12 (pessimistic=10, expected=11, optimistic=12)
+- ≥ 10  → 10
+- > −30 → 8
+- > −50 → 5
+- ≤ −50 → Failure (0)
+
+The three scenarios use Rand = 150 (pessimistic), 90 (expected), 30 (optimistic).
 
 **Special Pharmacy — Creation vs Difficulty comparison:**
 ```
@@ -119,9 +137,10 @@ The app calculates three scenarios using the random ranges: pessimistic (30, 4),
 ### UI Structure
 
 A **language selector** `<select>` (EN / ES / PT) sits next to the title in the header. The stats panel is **always visible** at the top regardless of active tab. Three tabs (centred):
-1. **Prices / Precios / Preços** — Edit material prices. Shows NPC base → discounted price. Item icons displayed per row. Manual override available.
+1. **Prices / Precios / Preços** — Edit material prices. Shows NPC base → discounted price. Item icons displayed per row. Manual override available. Includes all MC ingredients.
 2. **Potion Creation** — Table of 18 recipes with item icons, cost, success rate, profit. KaTeX formula section below with live stat substitution.
 3. **Special Pharmacy** — Table of 19 recipes with item icons, cost, quantity produced, per-unit cost, profit. KaTeX formula section with Creation/Difficulty breakdown and delta table.
+4. **Mix Cooking** — Table of 6 recipes with item icons, cost, pessimistic/expected/optimistic qty, per-unit cost, profit. KaTeX formula section with Creation value and delta table.
 
 Each recipe row has a "Detail" button that opens a modal with ingredient icons and pessimistic/expected/optimistic bar charts.
 
@@ -148,7 +167,7 @@ Each recipe row has a "Detail" button that opens a modal with ingredient icons a
 ## Important Notes
 
 - **Item Rates for Special Pharmacy** are sourced from browiki.org (cross-referenced against bRO server), which supersedes the iRO Wiki values previously used.
-- **Skill level caps**: Prepare Potion / Potion Research / Sp. Pharmacy / Discount max 10; Instruction Change / FCP max 5. These are enforced in the `Ni` inputs via `min`/`max` props.
+- **Skill level caps**: Prepare Potion / Potion Research / Sp. Pharmacy / Discount max 10; Instruction Change / FCP max 5; Mix Cooking max 2. These are enforced in the `Ni` inputs via `min`/`max` props.
 - **Discount skill at level 10 = 24%** discount (not 25%, this is intentional per official RO data).
 - The app targets **Ragnarok Latinoamérica** server — prices and availability may differ from iRO or other servers.
 - When a user sets a custom price to 0 in the Prices tab, it falls back to the NPC discounted price. To truly set a price to 0, the user should set it to 1.
@@ -171,3 +190,4 @@ Formula unit tests live in `src/lib/formulas.test.ts`. Run with `pnpm test`. Tes
 - `getSPCreation` — pessimistic / average / optimistic scenarios
 - `getSPMaxPot` — all skill level breakpoints (0–10)
 - `getSPQty` — all delta thresholds including minimum-of-1 guard
+- `getMCCreation` and `getMCQty` can be added following the same pattern
