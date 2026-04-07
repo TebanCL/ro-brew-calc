@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { type Stats, getSPCreation, getSPMaxPot, getMCCreation } from "../lib/formulas";
 import { lsGet, lsSet } from "../lib/storage";
 import { type Lang, LANG_LOCALES, ITEM_NAMES, UI } from "../lib/i18n";
-import { DISCOUNT_RATES, NPC_PRICES_BASE, defaultStats } from "../lib/data";
+import { DISCOUNT_RATES, NPC_PRICES_BASE, NO_DISCOUNT_ITEMS, defaultStats, ALL_ITEMS, ALL_CRAFTABLES } from "../lib/data";
 import type { PCRecipe, SPRecipe, MCRecipe } from "../lib/data";
 import { Button } from "@/components/ui/button";
 import { StatsPanel } from "./StatsPanel";
@@ -11,6 +11,24 @@ import { DetailModal } from "./DetailModal";
 import { PotionCreationTab } from "./PotionCreationTab";
 import { SpecialPharmacyTab } from "./SpecialPharmacyTab";
 import { MixCookingTab } from "./MixCookingTab";
+import {
+  fetchAllMarketPrices,
+  getMarketCacheAny,
+  setMarketCache,
+  getCooldownRemaining,
+} from "../lib/marketPrices";
+
+// Combined unique list to fetch in one pass (ingredients + craftable outputs).
+const ITEMS_TO_FETCH  = [...new Set([...ALL_ITEMS, ...ALL_CRAFTABLES])];
+const CRAFTABLE_SET   = new Set(ALL_CRAFTABLES);
+const INGREDIENT_SET  = new Set(ALL_ITEMS);
+
+function formatCooldown(ms: number): string {
+  const total = Math.ceil(ms / 1000);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
 
 export default function PotionCalc() {
   const [stats, setStats] = useState<Stats>(() => lsGet("ro_stats", defaultStats));
@@ -20,6 +38,56 @@ export default function PotionCalc() {
   const [tab, setTab] = useState(1);
   const [detail, setDetail] = useState<PCRecipe | SPRecipe | MCRecipe | null>(null);
 
+  // ── Market fetch state ────────────────────────────────────────────────────
+  const [fetching, setFetching]     = useState(false);
+  const [progress, setProgress]     = useState<{ done: number; total: number } | null>(null);
+  const [cacheTs, setCacheTs]       = useState<number | null>(() => getMarketCacheAny()?.ts ?? null);
+  const [cooldownMs, setCooldownMs] = useState<number>(() => getCooldownRemaining());
+  const abortRef                    = useRef<AbortController | null>(null);
+
+  const cooldownActive = cooldownMs > 0;
+  useEffect(() => {
+    if (!cooldownActive) return;
+    const id = setInterval(() => {
+      const remaining = getCooldownRemaining();
+      setCooldownMs(remaining);
+      if (remaining <= 0) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [cooldownActive]);
+
+  const canFetch = !fetching && cooldownMs <= 0;
+
+  async function handleFetch() {
+    if (!canFetch) return;
+    abortRef.current = new AbortController();
+    setFetching(true);
+    setProgress({ done: 0, total: ITEMS_TO_FETCH.length });
+    try {
+      const results = await fetchAllMarketPrices(
+        ITEMS_TO_FETCH,
+        "FREYA",
+        (done, total) => setProgress({ done, total }),
+        abortRef.current.signal,
+      );
+      const ingredientUpdates: Record<string, number> = {};
+      const sellUpdates: Record<string, number> = {};
+      for (const [item, price] of Object.entries(results)) {
+        if (INGREDIENT_SET.has(item)) ingredientUpdates[item] = price;
+        if (CRAFTABLE_SET.has(item))  sellUpdates[item] = price;
+      }
+      setPrices(prev => ({ ...prev, ...ingredientUpdates }));
+      setSellPrices(prev => ({ ...prev, ...sellUpdates }));
+      setMarketCache(results);
+      setCacheTs(Date.now());
+      setCooldownMs(getCooldownRemaining());
+    } finally {
+      setFetching(false);
+      setProgress(null);
+    }
+  }
+
+  // ── Persistence ───────────────────────────────────────────────────────────
   useEffect(() => { lsSet("ro_stats", stats); }, [stats]);
   useEffect(() => { lsSet("ro_prices", prices); }, [prices]);
   useEffect(() => { lsSet("ro_sell", sellPrices); }, [sellPrices]);
@@ -37,7 +105,7 @@ export default function PotionCalc() {
   const getPrice = useCallback((n: string): number => {
     if (prices[n] !== undefined && prices[n] !== 0) return prices[n];
     const base = NPC_PRICES_BASE[n];
-    if (base) return Math.floor(base * (100 - discRate) / 100);
+    if (base) return NO_DISCOUNT_ITEMS.has(n) ? base : Math.floor(base * (100 - discRate) / 100);
     return 0;
   }, [prices, discRate]);
 
@@ -59,6 +127,8 @@ export default function PotionCalc() {
   const fmtZ = (n: number) => (n >= 0 ? "+" : "") + fmt(Math.round(n)) + "z";
 
   const rowLabels: [string, string, string] = [u.pessimistic, u.expected, u.optimistic];
+
+  const minutesAgo = cacheTs !== null ? Math.floor((Date.now() - cacheTs) / 60_000) : null;
 
   return (
     <div className="p-2.5 max-w-[980px] mx-auto">
@@ -108,17 +178,38 @@ export default function PotionCalc() {
             mcCreationAvg={mcCreation} discRate={discRate}
           />
 
-          {/* TABS */}
-          <div className="flex gap-0.5 mb-1.5 flex-wrap justify-center">
-            {u.tabs.map((t, i) => (
+          {/* TABS + MARKET FETCH — 3-col grid keeps tabs perfectly centred */}
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1 mb-1.5">
+            <div /> {/* spacer mirrors the right column */}
+            <div className="flex gap-0.5 flex-wrap justify-center">
+              {u.tabs.map((t, i) => (
+                <Button
+                  key={i}
+                  variant={tab === i ? "ro-tab-active" : "ro-tab-inactive"}
+                  onClick={() => { setTab(i); setDetail(null); }}
+                >
+                  {t}
+                </Button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1.5 justify-end">
+              {minutesAgo !== null && !fetching && (
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                  {u.marketUpdated(minutesAgo)}
+                </span>
+              )}
               <Button
-                key={i}
-                variant={tab === i ? "ro-tab-active" : "ro-tab-inactive"}
-                onClick={() => { setTab(i); setDetail(null); }}
+                variant="ro" size="ro"
+                onClick={fetching ? () => abortRef.current?.abort() : handleFetch}
+                disabled={!fetching && !canFetch}
               >
-                {t}
+                {fetching
+                  ? u.marketFetching(progress?.done ?? 0, progress?.total ?? ITEMS_TO_FETCH.length)
+                  : cooldownMs > 0
+                    ? u.marketCooldown(formatCooldown(cooldownMs))
+                    : u.fetchMarketPrices}
               </Button>
-            ))}
+            </div>
           </div>
 
           <DetailModal
@@ -130,7 +221,12 @@ export default function PotionCalc() {
             rowLabels={rowLabels} sellPrices={sellPrices} setSellPrices={setSellPrices}
           />
 
-          {tab === 0 && <PricesTab prices={prices} setPrices={setPrices} u={u} tItem={tItem} discRate={discRate} />}
+          {tab === 0 && (
+            <PricesTab
+              prices={prices} setPrices={setPrices}
+              u={u} tItem={tItem} discRate={discRate}
+            />
+          )}
           {tab === 1 && (
             <PotionCreationTab
               stats={stats} getPrice={getPrice} sellPrices={sellPrices} setSellPrices={setSellPrices}
@@ -159,19 +255,24 @@ export default function PotionCalc() {
 
       <footer className="ro-raised bg-secondary text-muted-foreground text-center mt-1.5 py-1.5 px-2.5 text-[11px]">
         <div>{u.footer}</div>
-        <a
-          href="https://ko-fi.com/tebancl"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 mt-1.5 px-3 py-1 rounded-sm text-white text-[11px] font-bold transition-brightness hover:brightness-110"
-          style={{ background: "#FF5E5B" }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
-            <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 5.656-.082 8.37c0 5.928 6.269 5.655 6.269 5.655h4.241c2.303 0 3.168-1.487 3.168-1.487v1.26h2.53V14.95s.005 3.042 3.497 3.042h1.091c3.474 0 3.432-3.04 3.432-3.04l.15-4.074c.003-.095.002-.192-.002-.288l.543-.001s.003.04.003.04v4.323c0 .01 0 .02-.001.03 0 3.043-3.432 3.043-3.432 3.043h-1.091c-3.492 0-3.497-3.042-3.497-3.042v1.487H9.441s-6.269.273-6.269-5.655c0-2.714.082-8.37.082-8.37H19.02s4.086.508 4.859 4.593zm-5.082 4.002c0 1.654-1.344 2.995-3 2.995s-3-1.341-3-2.995V8.945h3c1.656 0 3 1.344 3 2.999v1.006z"/>
-          </svg>
-          Support on Ko-fi
-        </a>
+        <div className="mt-1 text-[10px] opacity-70">
+          Ragnarok Online is © Gravity Co., Ltd. &amp; Lee Myoungjin. Item icons and game data are used for non-commercial, informational purposes under fair use.
+        </div>
       </footer>
+
+      <a
+        href="https://ko-fi.com/tebancl"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Support on Ko-fi"
+        className="fixed bottom-4 right-4 z-50 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-white text-[11px] font-bold shadow-lg transition-brightness hover:brightness-110"
+        style={{ background: "#FF5E5B" }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+          <path d="M23.881 8.948c-.773-4.085-4.859-4.593-4.859-4.593H.723c-.604 0-.679.798-.679.798s-.082 5.656-.082 8.37c0 5.928 6.269 5.655 6.269 5.655h4.241c2.303 0 3.168-1.487 3.168-1.487v1.26h2.53V14.95s.005 3.042 3.497 3.042h1.091c3.474 0 3.432-3.04 3.432-3.04l.15-4.074c.003-.095.002-.192-.002-.288l.543-.001s.003.04.003.04v4.323c0 .01 0 .02-.001.03 0 3.043-3.432 3.043-3.432 3.043h-1.091c-3.492 0-3.497-3.042-3.497-3.042v1.487H9.441s-6.269.273-6.269-5.655c0-2.714.082-8.37.082-8.37H19.02s4.086.508 4.859 4.593zm-5.082 4.002c0 1.654-1.344 2.995-3 2.995s-3-1.341-3-2.995V8.945h3c1.656 0 3 1.344 3 2.999v1.006z"/>
+        </svg>
+        Support on Ko-fi
+      </a>
     </div>
   );
 }

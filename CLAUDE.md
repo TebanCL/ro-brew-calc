@@ -7,7 +7,7 @@ RO Potion Cost-Benefit Calculator — a single-page Astro + React app that helps
 ## Tech Stack
 
 - **Astro 6** with `@astrojs/react` integration
-- **React 19** (client-side components with `client:load`)
+- **React 19** (client-side components with `client:only="react"` — SSR skipped to avoid localStorage hydration mismatches)
 - **TypeScript** (strict mode)
 - **Tailwind CSS v4** via `@tailwindcss/vite` (no config file — configured in `src/styles/globals.css` via `@theme`)
 - **shadcn/ui** components in `src/components/ui/` — primitives styled to match the RO Basic Skin theme
@@ -43,9 +43,10 @@ ro-brew-calc/
 │   │   ├── PotionCreationTab.tsx   # PC table + KaTeX formula section
 │   │   ├── SpecialPharmacyTab.tsx  # SP table + KaTeX formula section
 │   │   ├── MixCookingTab.tsx       # MC table + KaTeX formula section
-│   │   ├── DetailModal.tsx         # Pessimistic/expected/optimistic detail modal
+│   │   ├── DetailModal.tsx         # Per-recipe detail modal: scenario table + bulk materials calculator
+│   │   ├── ScenarioTable.tsx       # Compact pess/avg/opt grid (metrics as rows, scenarios as columns)
 │   │   ├── Ni.tsx                  # Reusable number input (supports min/max clamping)
-│   │   ├── MiniBar.tsx             # Horizontal bar chart for 3-scenario display
+│   │   ├── MiniBar.tsx             # ⚠️ Unused — superseded by ScenarioTable; safe to delete
 │   │   └── Tex.tsx                 # KaTeX wrapper component
 │   ├── lib/
 │   │   ├── formulas.ts             # Pure formula functions + Stats interface (exported)
@@ -60,7 +61,7 @@ ro-brew-calc/
 │   ├── layouts/
 │   │   └── Layout.astro            # HTML shell, imports globals.css, KaTeX CDN link
 │   └── pages/
-│       └── index.astro             # Imports Layout + PotionCalc with client:load
+│       └── index.astro             # Imports Layout + PotionCalc with client:only="react"
 ├── components.json                 # shadcn/ui configuration
 ├── astro.config.mjs                # site/base config, @tailwindcss/vite plugin
 ├── eslint.config.js                # ESLint flat config
@@ -85,7 +86,9 @@ pnpm typecheck       # tsc --noEmit
 
 ### Core Data (in `src/lib/data.ts`; formulas in `src/lib/formulas.ts`)
 
-- `NPC_PRICES_BASE` — Base NPC prices before Discount skill. Key reference for item costs.
+- `NPC_PRICES_BASE` — Base reference prices for all ingredients (NPC prices or typical player-market values). Used as the default when no custom price is set. Can be overridden at runtime via the market price fetch feature.
+- `NO_DISCOUNT_ITEMS` — `Set<string>` of items whose price is never reduced by the Discount skill (currently: `"Gold"`). Checked in `getPrice` before applying the discount multiplier.
+- `ALL_CRAFTABLES` — Array of every recipe output name across PC, SP, and MC tabs (43 items). Used by the market fetch to populate `sellPrices`.
 - `PC_RECIPES` (Potion Creation) — 18 recipes. Each has `kind: "pc"`, `name`, `ingredients[]`, and `potionRate` (modifier to brew success %).
 - `SP_RECIPES` (Special Pharmacy) — 19 recipes. Each has `kind: "sp"`, `name`, `ingredients[]`, and `itemRate` (difficulty modifier).
 - `MC_RECIPES` (Mix Cooking) — 6 recipes. Each has `kind: "mc"`, `name`, `ingredients[]`, and `itemRate` (all 15). The `kind` discriminant is used for type-safe branching in the detail modal.
@@ -138,19 +141,20 @@ The app calculates three scenarios using the random ranges: pessimistic (30, 4),
 ### State (persisted to localStorage)
 
 - `ro_stats` — Player stats: base INT/DEX/LUK, bonus INT/DEX/LUK, levels, skill levels
-- `ro_prices` — Custom item prices (overrides NPC+discount defaults)
+- `ro_prices` — Custom item prices (overrides NPC+discount defaults); also written by the market fetch feature
 - `ro_sell` — Sell prices per potion name
 - `ro_lang` — Selected language (`"en"` | `"es"` | `"pt"`), defaults to `"en"`
+- `ro_market_cache` — Cached market prices `{ prices, ts }` with 30-minute TTL; `ts` also drives the 5-minute fetch cooldown
 
 ### UI Structure
 
-A **language selector** `<select>` (EN / ES / PT) sits next to the title in the header. The stats panel is **always visible** at the top regardless of active tab. Three tabs (centred):
+A **language selector** `<select>` (EN / ES / PT) sits next to the title in the header. The stats panel is **always visible** at the top regardless of active tab. Below the stats panel there is a **tab bar row** (3-column grid: empty spacer | centred tabs | "Fetch Market Prices" button). The fetch button is always visible regardless of active tab; during a fetch it shows live progress and acts as a cancel button; while on cooldown it shows a regressive countdown. Four tabs (centred):
 1. **Prices / Precios / Preços** — Edit material prices. Shows NPC base → discounted price. Item icons displayed per row. Manual override available. Includes all MC ingredients.
 2. **Potion Creation** — Table of 18 recipes with item icons, cost, success rate, profit. KaTeX formula section below with live stat substitution.
 3. **Special Pharmacy** — Table of 19 recipes with item icons, cost, quantity produced, per-unit cost, profit. KaTeX formula section with Creation/Difficulty breakdown and delta table.
 4. **Mix Cooking** — Table of 6 recipes with item icons, cost, pessimistic/expected/optimistic qty, per-unit cost, profit. KaTeX formula section with Creation value and delta table.
 
-Each recipe row has a "Detail" button that opens a modal with ingredient icons and pessimistic/expected/optimistic bar charts. Each row also has a **▸/▾ chevron** on the name cell — clicking it toggles an inline ingredient list (icon, qty, name, cost per ingredient) rendered as a collapsible `<TableRow>` spanning all columns.
+Each recipe row has a "Detail" button that opens a modal with ingredient icons, a `ScenarioTable` (pess/avg/opt metrics grid), and a **bulk materials calculator** (enter a target quantity → shows crafts needed and per-ingredient totals, accounting for failure rate on PC and showing separate scenarios on SP/MC). Each row also has a **▸/▾ chevron** on the name cell — clicking it toggles an inline ingredient list (icon, qty, name, cost per ingredient) rendered as a collapsible `<TableRow>` spanning all columns.
 
 ## Conventions
 
@@ -159,7 +163,8 @@ Each recipe row has a "Detail" button that opens a modal with ingredient icons a
 - Stats are split into "Base" and "Bonus/Bono/Bônus" depending on language.
 - Number inputs have browser spinners hidden via CSS (global reset in `Layout.astro`).
 - The `Ni` component is the reusable number input. Accepts optional `min` and `max` props — values are clamped both in HTML and in `onChange`.
-- `MiniBar` component renders horizontal comparison bars for the 3 scenarios. Accepts `rowLabels: [string, string, string]` for translated pessimistic/expected/optimistic labels.
+- `ScenarioTable` component renders a compact comparison grid for the 3 scenarios. Accepts `colLabels: [string, string, string]` and `rows: ScenarioRow[]` where each row has a label, three values, a per-row `fmt` function, and an optional `sign` flag to color positive/negative values green/red. Supersedes `MiniBar`.
+- `MiniBar` is no longer used (superseded by `ScenarioTable`) and can be deleted.
 - `Tex` component wraps KaTeX. Accepts `tex: string` and optional `display?: boolean` for display-mode math.
 - Item icons: use `itemIconUrl(name, import.meta.env.BASE_URL)` from `src/lib/data.ts`. Returns `null` if no icon is mapped for that item — always guard before rendering.
 - Skill icons live in `public/assets/icons/skills/` and are referenced directly via `import.meta.env.BASE_URL`.
@@ -177,6 +182,9 @@ Each recipe row has a "Detail" button that opens a modal with ingredient icons a
 - **Item Rates for Special Pharmacy** are sourced from browiki.org (cross-referenced against bRO server), which supersedes the iRO Wiki values previously used.
 - **Skill level caps**: Prepare Potion / Potion Research / Sp. Pharmacy / Discount max 10; Instruction Change / FCP max 5; Mix Cooking max 2. These are enforced in the `Ni` inputs via `min`/`max` props.
 - **Discount skill at level 10 = 24%** discount (not 25%, this is intentional per official RO data).
+- **`NO_DISCOUNT_ITEMS`** — items in this set (currently `"Gold"`) always return their flat base price; the Discount skill multiplier is not applied. Add items here when their price is fixed regardless of player skills.
+- **Market price fetch** (`src/lib/marketPrices.ts`) — "Fetch Market Prices" button in the global tab bar triggers a sequential fetch of all ingredients + craftable outputs via the Cloudflare Worker. Ingredient prices → `ro_prices`; craftable output prices → `ro_sell`. Prices from the market already reflect what players actually pay, so they must **not** have the Discount multiplier applied. This is automatically handled because fetched prices are stored as custom overrides, and `getPrice` in `PotionCalc.tsx` returns those overrides as-is (before the NPC+discount path). The fetch state and routing logic live entirely in `PotionCalc`; `PricesTab` is a pure display component.
+- **`worker/`** — Cloudflare Worker source. `index.js` is the proxy; `wrangler.toml` sets the worker name. Deploy with `npx wrangler deploy` from inside `worker/`. The Worker uses the Cloudflare Cache API (5-min TTL) to avoid hammering the upstream endpoint.
 - The app targets **Ragnarok Latinoamérica** server — prices and availability may differ from iRO or other servers.
 - When a user sets a custom price to 0 in the Prices tab, it falls back to the NPC discounted price. To truly set a price to 0, the user should set it to 1.
 - All recipes require a specific **manual/book** in inventory to craft. The books are not consumed and are not factored into the cost calculation.

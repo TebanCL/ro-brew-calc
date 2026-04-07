@@ -14,7 +14,7 @@ Targets the **Ragnarok Latinoamérica** server. Available in English, Spanish, a
 - **Special Pharmacy** — 19 recipes with quantity produced, per-unit cost, and batch profit
 - **Mix Cooking** — 6 recipes with pessimistic / expected / optimistic quantity scenarios
 - **Collapsible ingredient list** per recipe row — click any potion name to expand
-- **Detail modal** with pessimistic / expected / optimistic bar charts per recipe
+- **Detail modal** with compact pess/avg/opt scenario table and **bulk materials calculator** (enter a target quantity → see crafts needed and per-ingredient totals)
 - **Material Prices** — NPC base prices with Discount skill support and manual override
 - **KaTeX formula sections** with live stat substitution in all three craft tabs
 - All settings persisted in `localStorage` — no account needed
@@ -51,9 +51,9 @@ src/
 │   ├── PotionCreationTab.tsx   # PC table + KaTeX formula
 │   ├── SpecialPharmacyTab.tsx  # SP table + KaTeX formula
 │   ├── MixCookingTab.tsx       # MC table + KaTeX formula
-│   ├── DetailModal.tsx         # per-recipe detail modal
+│   ├── DetailModal.tsx         # per-recipe detail modal (scenario table + bulk calculator)
+│   ├── ScenarioTable.tsx       # compact pess/avg/opt comparison grid
 │   ├── Ni.tsx                  # reusable number input
-│   ├── MiniBar.tsx             # horizontal bar chart (3 scenarios)
 │   ├── Tex.tsx                 # KaTeX wrapper
 │   ├── RoTitleBar.tsx          # shared blue title bar
 │   └── ui/                     # shadcn/ui primitives

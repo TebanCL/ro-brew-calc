@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { Stats } from "../lib/formulas";
 import { getBrewRate, getSPQty, getMCCreation, getMCQty } from "../lib/formulas";
@@ -8,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { RoTitleBar } from "./RoTitleBar";
 import { Ni } from "./Ni";
-import { MiniBar } from "./MiniBar";
+import { ScenarioTable } from "./ScenarioTable";
 
 interface DetailModalProps {
   detail: PCRecipe | SPRecipe | MCRecipe | null;
@@ -35,6 +36,7 @@ export const DetailModal = ({
   specificVal, maxPot, pcBaseRate,
   rowLabels, sellPrices, setSellPrices,
 }: DetailModalProps) => {
+  const [bulkQty, setBulkQty] = useState(100);
   const r = detail;
   const cost = r ? r.ingredients.reduce((s, i) => s + i.q * getPrice(i.n), 0) : 0;
   const sell = r ? (sellPrices[r.name] || 0) : 0;
@@ -60,6 +62,41 @@ export const DetailModal = ({
     </div>
   ) : null;
 
+  const renderBulkSection = (scenarios: { label: string; crafts: number }[]) => {
+    if (!r) return null;
+    const multi = scenarios.length > 1;
+    return (
+      <div className="mt-3 border-t border-border pt-2">
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[12px] font-semibold text-foreground">{u.bulkTitle}:</span>
+          <Ni val={bulkQty} onChange={setBulkQty} min={1} max={9999} w="64px" />
+        </div>
+        {scenarios.map(({ label, crafts }, si) => (
+          crafts > 0 ? (
+            <div key={si} className="mb-2">
+              <div className="text-[11px] text-muted-foreground mb-0.5">
+                {multi ? `${label} — ` : ""}{u.bulkCrafts}: {crafts}
+              </div>
+              <div className="text-[12px]">
+                {r.ingredients.map((ing, ii) => (
+                  <div key={ii} className="flex items-center gap-1 text-secondary-foreground">
+                    {itemIconUrl(ing.n, import.meta.env.BASE_URL) && (
+                      <img src={itemIconUrl(ing.n, import.meta.env.BASE_URL)!} alt="" width={20} height={20} style={{ imageRendering: "pixelated", flexShrink: 0 }} />
+                    )}
+                    {crafts * ing.q}× {tItem(ing.n)} — <span className="text-ro-ing">{fmt(crafts * ing.q * getPrice(ing.n))}z</span>
+                  </div>
+                ))}
+                <div className="text-ro-cost font-bold mt-0.5">
+                  {u.bulkTotalCost}: {fmt(r.ingredients.reduce((s, ing) => s + crafts * ing.q * getPrice(ing.n), 0))}z
+                </div>
+              </div>
+            </div>
+          ) : null
+        ))}
+      </div>
+    );
+  };
+
   const renderBody = () => {
     if (!r) return null;
 
@@ -71,9 +108,19 @@ export const DetailModal = ({
         <>
           <p className="text-[11px] text-muted-foreground mb-1.5">{u.itemRate}: {r.itemRate} | {u.difficulty}: {specificVal}+{r.itemRate} = {specificVal + r.itemRate}</p>
           {ingredientList}{sellInput}
-          <MiniBar pess={Math.round(spCreationPess)} avg={Math.round(spCreationAvg)} opt={Math.round(spCreationOpt)} label={u.creationValue} rowLabels={rowLabels} />
-          <MiniBar pess={qP} avg={qA} opt={qO} label={u.qtyProduced} unit=" u" rowLabels={rowLabels} />
-          <MiniBar pess={sell * qP - cost} avg={sell * qA - cost} opt={sell * qO - cost} label={u.batchProfit} unit="z" rowLabels={rowLabels} />
+          <ScenarioTable
+            colLabels={rowLabels}
+            rows={[
+              { label: u.creationValue, vals: [Math.round(spCreationPess), Math.round(spCreationAvg), Math.round(spCreationOpt)], fmt: v => String(v) },
+              { label: u.qtyProduced,   vals: [qP, qA, qO],                                                                       fmt: v => `${v} u` },
+              { label: u.batchProfit,   vals: [sell * qP - cost, sell * qA - cost, sell * qO - cost],                             fmt: v => `${fmt(v)}z`, sign: true },
+            ]}
+          />
+          {renderBulkSection([
+            { label: rowLabels[0], crafts: qP > 0 ? Math.ceil(bulkQty / qP) : 0 },
+            { label: rowLabels[1], crafts: qA > 0 ? Math.ceil(bulkQty / qA) : 0 },
+            { label: rowLabels[2], crafts: qO > 0 ? Math.ceil(bulkQty / qO) : 0 },
+          ])}
         </>
       );
     }
@@ -83,28 +130,49 @@ export const DetailModal = ({
       const qP = getMCQty(creation, 150, r.itemRate, 0);
       const qA = getMCQty(creation, 90,  r.itemRate, 1);
       const qO = getMCQty(creation, 30,  r.itemRate, 2);
+      const deltaLabel = `Δ (${u.mcCreationLabel} − ${u.difficulty})`;
       return (
         <>
           <p className="text-[11px] text-muted-foreground mb-1.5">{u.itemRate}: {r.itemRate} | {u.mcCreationLabel}: {creation}</p>
           {ingredientList}{sellInput}
-          <MiniBar pess={creation - (150 + r.itemRate)} avg={creation - (90 + r.itemRate)} opt={creation - (30 + r.itemRate)} label={`Δ (${u.mcCreationLabel} − ${u.difficulty})`} rowLabels={rowLabels} />
-          <MiniBar pess={qP} avg={qA} opt={qO} label={u.qtyProduced} unit=" u" rowLabels={rowLabels} />
-          <MiniBar pess={sell * qP - cost} avg={sell * qA - cost} opt={sell * qO - cost} label={u.batchProfit} unit="z" rowLabels={rowLabels} />
+          <ScenarioTable
+            colLabels={rowLabels}
+            rows={[
+              { label: deltaLabel,    vals: [creation - (150 + r.itemRate), creation - (90 + r.itemRate), creation - (30 + r.itemRate)], fmt: v => String(v), sign: true },
+              { label: u.qtyProduced, vals: [qP, qA, qO],                                                                                fmt: v => `${v} u` },
+              { label: u.batchProfit, vals: [sell * qP - cost, sell * qA - cost, sell * qO - cost],                                      fmt: v => `${fmt(v)}z`, sign: true },
+            ]}
+          />
+          {renderBulkSection([
+            { label: rowLabels[0], crafts: qP > 0 ? Math.ceil(bulkQty / qP) : 0 },
+            { label: rowLabels[1], crafts: qA > 0 ? Math.ceil(bulkQty / qA) : 0 },
+            { label: rowLabels[2], crafts: qO > 0 ? Math.ceil(bulkQty / qO) : 0 },
+          ])}
         </>
       );
     }
 
     // PC
-    const rate = getBrewRate(stats, r.potionRate);
-    const cps  = rate > 0 ? Math.round(cost / (rate / 100)) : 0;
-    const prof = sell - cps;
+    const rate    = getBrewRate(stats, r.potionRate);
+    const ratePess = Math.max(0, pcBaseRate + r.potionRate);
+    const rateOpt  = Math.min(100, rate);
+    const cpsPess  = ratePess > 0 ? Math.round(cost / (ratePess / 100)) : 0;
+    const cps      = rate     > 0 ? Math.round(cost / (rate     / 100)) : 0;
+    const cpsOpt   = rateOpt  > 0 ? Math.round(cost / (rateOpt  / 100)) : 0;
+    const bulkCrafts = rate > 0 ? Math.ceil(bulkQty / (rate / 100)) : 0;
     return (
       <>
         <p className="text-[11px] text-muted-foreground mb-1.5">{u.potionRate}: {r.potionRate > 0 ? "+" : ""}{r.potionRate}%</p>
         {ingredientList}{sellInput}
-        <MiniBar pess={Math.max(0, pcBaseRate + r.potionRate)} avg={rate} opt={Math.min(100, rate)} label={u.successRate} unit="%" rowLabels={rowLabels} />
-        <MiniBar pess={rate > 0 ? Math.round(cost / (rate / 100)) : 0} avg={cps} opt={rate > 0 ? Math.round(cost / (Math.min(100, rate) / 100)) : 0} label={u.costPerSuccess} unit="z" rowLabels={rowLabels} />
-        <MiniBar pess={sell - (rate > 0 ? Math.round(cost / (rate / 100)) : 0)} avg={Math.round(prof)} opt={sell - (rate > 0 ? Math.round(cost / (Math.min(100, rate) / 100)) : 0)} label={u.netProfit} unit="z" rowLabels={rowLabels} />
+        <ScenarioTable
+          colLabels={rowLabels}
+          rows={[
+            { label: u.successRate,   vals: [ratePess, rate, rateOpt],                fmt: v => `${v.toFixed(1)}%` },
+            { label: u.costPerSuccess, vals: [cpsPess, cps, cpsOpt],                  fmt: v => `${fmt(v)}z` },
+            { label: u.netProfit,      vals: [sell - cpsPess, sell - cps, sell - cpsOpt], fmt: v => `${fmt(v)}z`, sign: true },
+          ]}
+        />
+        {renderBulkSection([{ label: "", crafts: bulkCrafts }])}
       </>
     );
   };

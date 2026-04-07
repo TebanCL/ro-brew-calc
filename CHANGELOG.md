@@ -35,6 +35,52 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **Bulk materials calculator** in the detail modal — enter a target quantity and see the number of crafts needed plus per-ingredient totals and total material cost
+  - Potion Creation: craft count accounts for the failure rate (`ceil(qty / rate%)`)
+  - Special Pharmacy / Mix Cooking: shows pessimistic / expected / optimistic scenarios separately
+- `NO_DISCOUNT_ITEMS` set in `src/lib/data.ts` — items listed here are never discounted regardless of Discount skill level (currently: Gold)
+- Monster Feed icon (`548.png`) added to `ITEM_ICONS` and downloaded to `public/assets/icons/items/`
+- **Market price fetching** via a Cloudflare Worker proxy (`worker/`)
+  - `worker/index.js` — Cloudflare Worker: proxies ROLATAM shop search, parses RSC payload, returns lowest sell price as JSON; edge-cached for 5 minutes per item
+  - `worker/wrangler.toml` — Wrangler deploy configuration (`name = "ro-prices"`)
+  - `src/lib/marketPrices.ts` — client-side helpers: `fetchAllMarketPrices`, localStorage cache with 30-minute TTL (`ro_market_cache` key)
+  - **"Fetch Market Prices" button lives in the global tab bar** (always visible regardless of active tab) — fetch logic and state live in `PotionCalc`; `PricesTab` is a pure display component
+  - Fetched prices merge into the custom price overrides; items with no active listings are left unchanged
+  - Fetch covers both ingredients (`ALL_ITEMS` → `ro_prices`) and craftable outputs (`ALL_CRAFTABLES` → `ro_sell`) in a single pass; items that are both (e.g. Red Potion) update both states
+  - Worker URL sourced from `PUBLIC_WORKER_URL` env variable (`.env` locally, `secrets.PUBLIC_WORKER_URL` in GitHub Actions); hardcoded in `src/lib/marketPrices.ts` — not exposed in the UI
+  - 5-minute cooldown between fetches persisted via `ro_market_cache.ts` in localStorage; button shows regressive countdown while locked
+  - "Updated Xm ago" indicator shown next to the button
+
+### Fixed
+- Hydration mismatch on page load: `PotionCalc` switched from `client:load` to `client:only="react"` so Astro skips SSR for the component, preventing React from diffing server-rendered defaults against localStorage values
+- Tab bar centering broken by fetch button: replaced `flex justify-between` with a 3-column grid (`grid-cols-[1fr_auto_1fr]`) so tabs remain centred regardless of button width
+
+### Changed
+- **Detail modal scenario visualization** replaced horizontal bar charts (`MiniBar`) with a compact `ScenarioTable` grid — metrics as rows, pess/avg/opt as columns; profit values colored green/red by sign
+- **NPC base prices** updated to reflect actual ROLATAM server and player-market values:
+  - Empty Potion Bottle: 20 → 7
+  - Empty Test Tube: 100 → 2
+  - Empty Bottle: 6 → 400
+  - Medicine Bowl: 8 → 250
+  - Scell: 58 → 120
+  - Glass Tube: 200 → 5,000
+  - Morning Dew of Yggdrasil: 2,000 → 20,000
+  - Seed of Life: 3,000 → 60,000
+  - Red Potion: 50 → 10
+  - Spicy Sauce: 10 → 525
+  - Sweet Sauce: 10 → 525
+  - Holy Water: 20 → 0 (removed from NPC prices — not NPC-purchaseable)
+  - Red Syrup: *(new)* 800
+  - Blue Syrup: *(new)* 7,000
+  - Yggdrasil Leaf: *(new)* 12,000
+  - Gold: *(new)* 200,000 (fixed price, exempt from Discount skill)
+  - Large Cookpot: *(new)* 625
+  - Black Charcoal: *(new)* 375
+  - Melange Pot: *(new)* 750
+  - Fine Noodle: *(new)* 625
+  - Cool Gravy: *(new)* 500
+
 ---
 
 ## [1.3.0] - 2026-04-07

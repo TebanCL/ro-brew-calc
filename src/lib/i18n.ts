@@ -168,6 +168,14 @@ export interface UiStrings {
   mcSubtitle: string;
   mcCreationLabel: string;
   mcFailure: string;
+  bulkTitle: string;
+  bulkTarget: string;
+  bulkCrafts: string;
+  bulkTotalCost: string;
+  fetchMarketPrices: string;
+  marketFetching: (done: number, total: number) => string;
+  marketUpdated: (mins: number) => string;
+  marketCooldown: (remaining: string) => string;
 }
 
 export const UI: Record<Lang, UiStrings> = {
@@ -223,6 +231,14 @@ export const UI: Record<Lang, UiStrings> = {
     mcSubtitle: "1 craft = 1 set of ingredients → produces multiple dishes. All Item Rates: 15.",
     mcCreationLabel: "Creation",
     mcFailure: "Failure",
+    bulkTitle: "Materials for quantity",
+    bulkTarget: "Target qty",
+    bulkCrafts: "Crafts needed",
+    bulkTotalCost: "Total material cost",
+    fetchMarketPrices: "Fetch Market Prices",
+    marketFetching: (done, total) => `Fetching… ${done}/${total}`,
+    marketUpdated: (mins) => mins === 0 ? "Updated just now" : `Updated ${mins}m ago`,
+    marketCooldown: (r) => `Available in ${r}`,
   },
   es: {
     subtitle: "Servidor: Ragnarok Latinoamérica",
@@ -276,6 +292,14 @@ export const UI: Record<Lang, UiStrings> = {
     mcSubtitle: "1 craft = 1 set de ingredientes → produce múltiples platos. Item Rate: 15 en todos.",
     mcCreationLabel: "Creación",
     mcFailure: "Fallo",
+    bulkTitle: "Materiales para cantidad",
+    bulkTarget: "Cantidad objetivo",
+    bulkCrafts: "Crafts necesarios",
+    bulkTotalCost: "Costo total de materiales",
+    fetchMarketPrices: "Obtener precios del mercado",
+    marketFetching: (done, total) => `Buscando… ${done}/${total}`,
+    marketUpdated: (mins) => mins === 0 ? "Actualizado ahora" : `Actualizado hace ${mins}m`,
+    marketCooldown: (r) => `Disponible en ${r}`,
   },
   pt: {
     subtitle: "Servidor: Ragnarok Latinoamérica",
@@ -329,5 +353,13 @@ export const UI: Record<Lang, UiStrings> = {
     mcSubtitle: "1 craft = 1 conjunto de ingredientes → produz vários pratos. Item Rate: 15 em todos.",
     mcCreationLabel: "Criação",
     mcFailure: "Falha",
+    bulkTitle: "Materiais para quantidade",
+    bulkTarget: "Qtd desejada",
+    bulkCrafts: "Crafts necessários",
+    bulkTotalCost: "Custo total de materiais",
+    fetchMarketPrices: "Buscar preços do mercado",
+    marketFetching: (done, total) => `Buscando… ${done}/${total}`,
+    marketUpdated: (mins) => mins === 0 ? "Atualizado agora" : `Atualizado há ${mins}m`,
+    marketCooldown: (r) => `Disponível em ${r}`,
   },
 };

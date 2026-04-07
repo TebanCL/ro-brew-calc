@@ -7,14 +7,20 @@ export interface MCRecipe { kind: "mc"; name: string; ingredients: Ingredient[];
 
 export const DISCOUNT_RATES = [0, 7, 9, 11, 13, 15, 17, 19, 21, 23, 24];
 
+/** Items whose base price is fixed and not affected by the Discount skill */
+export const NO_DISCOUNT_ITEMS = new Set(["Gold"]);
+
 export const NPC_PRICES_BASE: Record<string, number> = {
   "Red Herb": 18, "Yellow Herb": 40, "White Herb": 80, "Blue Herb": 60, "Green Herb": 10,
-  "Empty Potion Bottle": 20, "Empty Test Tube": 100, "Empty Bottle": 6, "Medicine Bowl": 8,
-  "Scell": 58, "Glass Tube": 200, "Morning Dew of Yggdrasil": 2000, "Seed of Life": 3000,
-  "Red Potion": 50, "Yellow Potion": 180, "White Potion": 1200,
+  "Empty Potion Bottle": 7, "Empty Test Tube": 2, "Empty Bottle": 400, "Medicine Bowl": 250,
+  "Scell": 120, "Glass Tube": 5000, "Morning Dew of Yggdrasil": 20000, "Seed of Life": 60000,
+  "Red Potion": 10, "Yellow Potion": 180, "White Potion": 1200,
   "Concentration Potion": 800, "Awakening Potion": 1500,
-  "Spicy Sauce": 10, "Sweet Sauce": 10, "Holy Water": 20, "Monster Feed": 60,
+  "Spicy Sauce": 525, "Sweet Sauce": 525, "Monster Feed": 60,
   "Panacea": 500, "Yellow Syrup": 1200, "White Syrup": 1500,
+  "Red Syrup": 800, "Blue Syrup": 7000, "Yggdrasil Leaf": 12000, "Gold": 200000,
+  "Large Cookpot": 625, "Black Charcoal": 375, "Melange Pot": 750,
+  "Fine Noodle": 625, "Cool Gravy": 500,
 };
 
 export const defaultStats: Stats = {
@@ -84,6 +90,13 @@ function getAllUniqueItems(): string[] {
 
 export const ALL_ITEMS = getAllUniqueItems();
 
+/** Names of every craftable output across all three recipe tabs. */
+export const ALL_CRAFTABLES: string[] = [
+  ...PC_RECIPES.map(r => r.name),
+  ...SP_RECIPES.map(r => r.name),
+  ...MC_RECIPES.map(r => r.name),
+];
+
 /** Maps item name (English) to divine-pride item ID for icon display */
 export const ITEM_ICONS: Record<string, number> = {
   // PC recipe outputs
@@ -144,6 +157,7 @@ export const ITEM_ICONS: Record<string, number> = {
   "Spicy Sauce": 7455,
   "Sweet Sauce": 7453,
   "Holy Water": 523,
+  "Monster Feed": 548,
   "Panacea": 525,
   "Yellow Syrup": 11622,
   "White Syrup": 11623,
