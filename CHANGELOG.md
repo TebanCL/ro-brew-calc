@@ -9,6 +9,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **Collapsible ingredient list** in all recipe tabs (Potion Creation, Special Pharmacy, Mix Cooking)
+  - Click on any recipe row's name cell to toggle a dropdown showing all ingredients
+  - Each ingredient shows its icon (16×16), quantity × translated name, and cost in zeny
+  - Expanded row inherits the alternating row background color
+  - ▸/▾ chevron indicator on each row reflects open/closed state
+
+### Added (previous)
 - **Tailwind CSS v4** via `@tailwindcss/vite` Vite plugin (no config file — pure CSS)
 - **shadcn/ui** scaffolded: `components.json`, `src/styles/globals.css`, `src/lib/utils.ts`
 - `src/components/ui/button.tsx` and `src/components/ui/input.tsx` (shadcn primitives)

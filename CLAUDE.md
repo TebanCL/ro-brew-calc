@@ -150,7 +150,7 @@ A **language selector** `<select>` (EN / ES / PT) sits next to the title in the 
 3. **Special Pharmacy** — Table of 19 recipes with item icons, cost, quantity produced, per-unit cost, profit. KaTeX formula section with Creation/Difficulty breakdown and delta table.
 4. **Mix Cooking** — Table of 6 recipes with item icons, cost, pessimistic/expected/optimistic qty, per-unit cost, profit. KaTeX formula section with Creation value and delta table.
 
-Each recipe row has a "Detail" button that opens a modal with ingredient icons and pessimistic/expected/optimistic bar charts.
+Each recipe row has a "Detail" button that opens a modal with ingredient icons and pessimistic/expected/optimistic bar charts. Each row also has a **▸/▾ chevron** on the name cell — clicking it toggles an inline ingredient list (icon, qty, name, cost per ingredient) rendered as a collapsible `<TableRow>` spanning all columns.
 
 ## Conventions
 
