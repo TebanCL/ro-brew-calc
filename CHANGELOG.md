@@ -6,6 +6,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.4.0](https://github.com/TebanCL/ro-brew-calc/compare/ro-brew-calc-v1.3.0...ro-brew-calc-v1.4.0) (2026-04-07)
+
+
+### ### Added
+
+* add collapsible ingredient list per recipe row in all tabs ([a2532ad](https://github.com/TebanCL/ro-brew-calc/commit/a2532add7be42c0579a30f92fbd09c31ada5d242))
+* add GitHub icon link in header for starring and collaborating ([5b32188](https://github.com/TebanCL/ro-brew-calc/commit/5b32188e77191cf0c9b96c99cfcc9ce578b6f053))
+* add Ko-fi support button in footer ([fd48cca](https://github.com/TebanCL/ro-brew-calc/commit/fd48ccaed440ad5901576bcd555cbb27d9cb11e4))
+* add Mix Cooking tab with 6 recipes, icons, formulas, and i18n ([43aebc7](https://github.com/TebanCL/ro-brew-calc/commit/43aebc7c6f609e710642e725509afbcb3aa646e9))
+* add pixel-art favicon and logo, improve mobile layout ([6155995](https://github.com/TebanCL/ro-brew-calc/commit/6155995c7f019ae9bc4f061a6dbfb73b33dd40c3))
+* initial release v1.2.0 ([970693b](https://github.com/TebanCL/ro-brew-calc/commit/970693b24f5e0c05d975493b4515df595408c68f))
+* **seo:** add Open Graph, Twitter Card, canonical URL, JSON-LD, robots.txt and sitemap ([38dd3df](https://github.com/TebanCL/ro-brew-calc/commit/38dd3df96596510d379be729f381528e0ee10b1d))
+
+
+### ### Fixed
+
+* add trailing slash to base URL so asset paths resolve correctly ([ad0f870](https://github.com/TebanCL/ro-brew-calc/commit/ad0f870bcfb13ff6f5b91926a8de5c66bdd476a2))
+* add typescript devDep and astro/client types for CI typecheck ([e607d2f](https://github.com/TebanCL/ro-brew-calc/commit/e607d2fd4342395f57b1d4916158073a27bf1c98))
+* **lint:** remove unused RoTitleBar import in PotionCalc ([5378072](https://github.com/TebanCL/ro-brew-calc/commit/537807249d01f994dc511daadac8b0558bd73343))
+* replace 0-byte Mix Cooking item icons with valid PNGs from irowiki ([c6d2268](https://github.com/TebanCL/ro-brew-calc/commit/c6d22681b6a98e5e2239d5ffbde7a6cc2bdce1d4))
+
+
+### ### Changed
+
+* migrate all components to shadcn/ui and Tailwind CSS ([149bdcf](https://github.com/TebanCL/ro-brew-calc/commit/149bdcf76568f876942145090d31d70c7c7cb65d))
+* **Ni:** migrate to shadcn Input ([db78fae](https://github.com/TebanCL/ro-brew-calc/commit/db78fae4a7ad37af8a939a55e512bb19764ee18a))
+
 ## [Unreleased]
 
 ---
