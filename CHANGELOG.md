@@ -6,6 +6,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [1.5.0](https://github.com/TebanCL/ro-brew-calc/compare/ro-brew-calc-v1.4.0...ro-brew-calc-v1.5.0) (2026-04-08)
+
+
+### ### Added
+
+* market price fetch, ScenarioTable, and bulk materials calculator ([6003052](https://github.com/TebanCL/ro-brew-calc/commit/600305262a3290514a7bfb70437dca069b58821e))
+
 ## [1.4.0](https://github.com/TebanCL/ro-brew-calc/compare/ro-brew-calc-v1.3.0...ro-brew-calc-v1.4.0) (2026-04-07)
 
 
