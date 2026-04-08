@@ -12,7 +12,7 @@ RO Potion Cost-Benefit Calculator — a single-page Astro + React app that helps
 - **Tailwind CSS v4** via `@tailwindcss/vite` (no config file — configured in `src/styles/globals.css` via `@theme`)
 - **shadcn/ui** components in `src/components/ui/` — primitives styled to match the RO Basic Skin theme
 - RO Basic Skin theme: cool blue-gray palette mapped to CSS variables; 3-D bevel borders via `.ro-raised` / `.ro-sunken` Tailwind utilities
-- **KaTeX** for math formula rendering in the browser (CSS loaded from CDN in `Layout.astro`)
+- **KaTeX** for math formula rendering in the browser (CSS loaded from CDN in `Layout.astro` with SRI hash)
 - **localStorage** for persistence (stats, prices, sell prices, language preference)
 - **i18n**: English (default), Spanish, Portuguese — via `ITEM_NAMES` map + `UI` strings object in `src/lib/i18n.ts`
 - **pnpm** as package manager (enforced via `only-allow` + `packageManager` field)
@@ -59,7 +59,7 @@ ro-brew-calc/
 │   ├── styles/
 │   │   └── globals.css             # Tailwind v4 entry, RO CSS variables, ro-raised/ro-sunken utilities
 │   ├── layouts/
-│   │   └── Layout.astro            # HTML shell, imports globals.css, KaTeX CDN link
+│   │   └── Layout.astro            # HTML shell, imports globals.css, KaTeX CDN link (SRI), security meta tags
 │   └── pages/
 │       └── index.astro             # Imports Layout + PotionCalc with client:only="react"
 ├── components.json                 # shadcn/ui configuration
@@ -189,6 +189,20 @@ Each recipe row has a "Detail" button that opens a modal with ingredient icons, 
 - When a user sets a custom price to 0 in the Prices tab, it falls back to the NPC discounted price. To truly set a price to 0, the user should set it to 1.
 - All recipes require a specific **manual/book** in inventory to craft. The books are not consumed and are not factored into the cost calculation.
 - **Icons**: item icons are named by divine-pride numeric ID (e.g. `501.png`). The mapping from item name → ID lives in `ITEM_ICONS` in `src/lib/data.ts`. When adding new recipes, add the corresponding ID there and download the icon to `public/assets/icons/items/`.
+
+## Security
+
+Security headers are applied via HTML `<meta>` tags in `Layout.astro` (GitHub Pages does not support custom HTTP response headers):
+
+- **Content-Security-Policy** — Restricts resource loading to `self`, KaTeX on `cdn.jsdelivr.net`, and the Cloudflare Worker for `connect-src`. Uses `'unsafe-inline'` for scripts and styles (required by Astro's inline hydration scripts and Tailwind). Sets `base-uri 'self'` and `form-action 'self'`.
+- **Referrer-Policy** (`strict-origin-when-cross-origin`) — Sends only the origin on cross-origin requests; suppresses path and query string from leaking.
+- **SRI on KaTeX CDN link** — `integrity="sha384-..."` on the `<link>` tag ensures the browser rejects the stylesheet if the CDN serves a tampered file.
+
+Headers that cannot be set without a CDN/proxy layer (e.g. Cloudflare transform rules) and are therefore absent:
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY` (note: `frame-ancestors` in a `<meta>` CSP is ignored by browsers)
+- `Permissions-Policy`
+- `Strict-Transport-Security`
 
 ## Deployment
 
